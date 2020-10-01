@@ -3,6 +3,7 @@ package user_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -166,6 +167,43 @@ func TestLogin(t *testing.T) {
 			reqBody, _ := json.Marshal(tt.args.data)
 			req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(reqBody))
 			req.Header.Set("Content-Type", tt.args.contentType)
+
+			res, _ := r.Test(req, -1)
+			resBody, _ := ioutil.ReadAll(res.Body)
+
+			assert.Equalf(t, tt.args.statusCode, res.StatusCode, string(resBody))
+		})
+	}
+}
+
+func TestDelete(t *testing.T) {
+	err := database.Connect()
+	if err != nil {
+		panic("Can't connect database.")
+	}
+	r := routes.New()
+
+	type args struct {
+		userId     uint
+		statusCode int
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{"Valid delete user", args{
+			userId:     createdUser.ID,
+			statusCode: http.StatusOK,
+		}},
+		{"User not found", args{
+			userId:     createdUser.ID + 1,
+			statusCode: http.StatusNotFound,
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			endpoint := fmt.Sprintf("/api/v1/users/%d", tt.args.userId)
+			req, _ := http.NewRequest(http.MethodDelete, endpoint, nil)
 
 			res, _ := r.Test(req, -1)
 			resBody, _ := ioutil.ReadAll(res.Body)

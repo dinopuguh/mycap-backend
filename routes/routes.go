@@ -30,6 +30,7 @@ func New() *fiber.App {
 	v1.Post("/login", user.Login)
 
 	v1.Get("/users", user.GetAll)
+	v1.Delete("/users/:id", user.Delete)
 
 	// app.Use(jwtware.New(jwtware.Config{
 	// 	SigningKey: auth.MySigningKey,

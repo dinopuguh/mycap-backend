@@ -24,8 +24,6 @@ import (
 // @host localhost:3000
 // @BasePath /api
 
-// @securityDefinitions.basic BasicAuth
-
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization

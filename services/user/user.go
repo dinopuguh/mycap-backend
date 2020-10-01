@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/dinopuguh/mycap-backend/database"
@@ -41,4 +42,41 @@ func GetAll(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(users)
+}
+
+// Delete function removes a user by ID
+// @Summary Remove user by ID
+// @Description Remove user by ID
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} response.HTTPError
+// @Failure 503 {object} response.HTTPError
+// @Router /v1/users/{id} [delete]
+func Delete(c *fiber.Ctx) error {
+	id := c.Params("id")
+	db := database.DBConn
+
+	var user User
+	res := db.First(&user, id)
+
+	if res.RowsAffected == 0 {
+		return c.Status(http.StatusNotFound).JSON(response.HTTPError{
+			Status:  http.StatusNotFound,
+			Message: fmt.Sprintf("User with ID %v not found.", id),
+		})
+	}
+
+	if res = db.Delete(&user); res.Error != nil {
+		return c.Status(http.StatusServiceUnavailable).JSON(response.HTTPError{
+			Status:  http.StatusServiceUnavailable,
+			Message: res.Error.Error(),
+		})
+	}
+
+	return c.JSON(response.HTTPError{
+		Status:  http.StatusOK,
+		Message: "User deleted.",
+	})
 }

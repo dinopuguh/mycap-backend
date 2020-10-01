@@ -155,11 +155,34 @@ paths:
       summary: Get all users
       tags:
       - user
+  /v1/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Remove user by ID
+      tags:
+      - user
 securityDefinitions:
   ApiKeyAuth:
     in: header
     name: Authorization
     type: apiKey
-  BasicAuth:
-    type: basic
 swagger: "2.0"
