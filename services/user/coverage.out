@@ -1,0 +1,26 @@
+mode: set
+github.com/dinopuguh/mycap-backend/services/user/auth.go:30.30,34.44 3 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:41.2,42.88 2 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:49.2,49.94 1 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:56.2,58.16 3 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:65.2,65.46 1 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:72.2,73.16 2 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:80.2,83.4 1 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:34.44,39.3 1 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:42.88,47.3 1 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:49.94,54.3 1 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:58.16,63.3 1 0
+github.com/dinopuguh/mycap-backend/services/user/auth.go:65.46,70.3 1 0
+github.com/dinopuguh/mycap-backend/services/user/auth.go:73.16,78.3 1 0
+github.com/dinopuguh/mycap-backend/services/user/auth.go:99.32,103.45 3 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:110.2,111.83 2 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:118.2,118.63 1 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:125.2,126.16 2 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:133.2,136.4 1 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:103.45,108.3 1 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:111.83,116.3 1 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:118.63,123.3 1 1
+github.com/dinopuguh/mycap-backend/services/user/auth.go:126.16,131.3 1 0
+github.com/dinopuguh/mycap-backend/services/user/user.go:32.33,36.46 3 1
+github.com/dinopuguh/mycap-backend/services/user/user.go:43.2,43.22 1 1
+github.com/dinopuguh/mycap-backend/services/user/user.go:36.46,41.3 1 0
