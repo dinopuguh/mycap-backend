@@ -1,17 +1,18 @@
 language: go
 go:
-  - "1.14.7"
+- 1.14.7
 services:
-  - postgresql
+- postgresql
 env:
   global:
-    - MYCAP_DB_USER=postgres
-    - MYCAP_DB_PASSWORD=postgres
-    - MYCAP_DB_HOST=localhost
-    - MYCAP_DB_NAME=mycap
-    - MYCAP_DB_PORT=5432
+  - MYCAP_DB_USER=postgres
+  - MYCAP_DB_PASSWORD=postgres
+  - MYCAP_DB_HOST=localhost
+  - MYCAP_DB_NAME=mycap
+  - MYCAP_DB_PORT=5432
+  - secure: ggKqLcD5pRzOhkQKTx+Oeb8jFK6TlNgYJpNdEY8CA9O6H7EWyJ50hPJxVqz2rLjNQrIiVf0+XPA2+17cWizFPi9qdWcIXj6rJkbMYYLWChEXVki7crsstAssvdX+rfHgwAPSFJ4gIr6LFxh/9KUEv13V11ZReEg40K2UIRJd+WhQxXoaU3xJNEjbiLpTPDyxK3zLdbPLFBfuzC3HOONFubFr5LDy8uRVPMwEL9KzTWReSN+YDLY/BoVSWAS8z2hW4FvLoYU1irHFcvvEg1c/ysbwwrHf4/A/nDouK2DQU294h2bsX7Q9CCRS3HgcW+KaZaOsS1SI4Y48CT1uCPElLKG/zYJLDCeTEcu4B9yk+YSzpx+D+bY4sxV51Z/1j86a/j7Er4Atv8gfC0Uh5NnoOigno0RGqSUx4KuRoXl1yO2wR6ix2fqjDYa5ZFz55p/Lrx3xIVghRf3s+trelZRp+qvyiCFljURvtCkTZiGEeFVQQjDxdLp8dUkf7EKUX3PlUfNBddWqjg0hfRUSnI5y3OhxUUQKjXM1cUY4wXJQJoMwrN3+ePJsGdRNkFiSusskPufhE/vWpGOpbM4eewnsVTcMwSKMNQVx81O1W0JsieOnrRm0B+4ln7nuecwoO/owhYTkoWpKLAWX1na69STuLx+oUS5y8q8bL2Tn5VjEVVA=
 before_script:
-  - psql -c 'create database mycap;' -U postgres
+- psql -c 'create database mycap;' -U postgres
 script:
-  - scripts/cibuild
+- scripts/cibuild
 sudo: false
