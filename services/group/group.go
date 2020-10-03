@@ -226,6 +226,12 @@ func Leave(c *fiber.Ctx) error {
 	}
 
 	if group.AdminID == leavingUser.ID {
+		leavingUser.RemainingTime = leaveGroup.RemainingTime
+		if leaveGroup.RemainingTime == 0 {
+			leavingUser.ReachedTimeLimit = true
+		}
+		db.Save(&leavingUser)
+
 		db.Model(&group).Association("Participants").Clear()
 		db.Delete(&group)
 	} else {

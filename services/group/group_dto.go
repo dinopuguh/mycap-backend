@@ -13,4 +13,5 @@ type JoinGroup struct {
 // LeaveGroup is a data transfer object for leaving group
 type LeaveGroup struct {
 	AdminUsername string `json:"admin_username"`
+	RemainingTime int64  `json:"remaining_time"`
 }

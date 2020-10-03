@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/dinopuguh/mycap-backend/response"
 	"github.com/dinopuguh/mycap-backend/services/user"
 
 	"github.com/dinopuguh/mycap-backend/database"
@@ -21,10 +22,10 @@ var (
 )
 
 func TestNew(t *testing.T) {
-	err := database.Connect()
-	if err != nil {
+	if err := database.Connect(); err != nil {
 		panic("Can't connect database.")
 	}
+
 	app := routes.New()
 
 	type args struct {
@@ -98,11 +99,14 @@ func TestNew(t *testing.T) {
 			reqLogin, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(loginBody))
 			reqLogin.Header.Set("Content-Type", "application/json")
 
-			var login = new(user.ResponseAuth)
+			resHttp := new(response.HTTP)
+			login := new(user.ResponseAuth)
 			resLogin, _ := app.Test(reqLogin, -1)
 			defer resLogin.Body.Close()
 			resBodyLogin, _ := ioutil.ReadAll(resLogin.Body)
-			json.Unmarshal(resBodyLogin, &login)
+			json.Unmarshal(resBodyLogin, &resHttp)
+			loginJson, _ := json.Marshal(resHttp.Data)
+			json.Unmarshal(loginJson, &login)
 
 			reqBody, _ := json.Marshal(tt.args.data)
 			req, _ := http.NewRequest(http.MethodPost, "/api/v1/groups", bytes.NewBuffer(reqBody))
@@ -112,38 +116,43 @@ func TestNew(t *testing.T) {
 			res, _ := app.Test(req, -1)
 			defer res.Body.Close()
 			resBody, _ := ioutil.ReadAll(res.Body)
+			json.Unmarshal(resBody, &resHttp)
 
-			assert.Equalf(t, tt.args.statusCode, res.StatusCode, string(resBody))
+			assert.Equalf(t, tt.args.statusCode, resHttp.Status, string(resBody))
 
 			if tt.args.statusCode == http.StatusOK {
-				json.Unmarshal(resBody, &createdGroup)
+				groupJson, _ := json.Marshal(resHttp.Data)
+				json.Unmarshal(groupJson, &createdGroup)
 			}
 		})
 	}
 }
 
 func TestGetAll(t *testing.T) {
-	err := database.Connect()
-	if err != nil {
+	if err := database.Connect(); err != nil {
 		panic("Can't connect database.")
 	}
-	router := routes.New()
+
+	app := routes.New()
+
 	t.Run("Get all groups", func(t *testing.T) {
 		req, _ := http.NewRequest(http.MethodGet, "/api/v1/groups", nil)
 
-		res, _ := router.Test(req, -1)
+		resHttp := new(response.HTTP)
+		res, _ := app.Test(req, -1)
 		defer res.Body.Close()
 		resBody, _ := ioutil.ReadAll(res.Body)
+		json.Unmarshal(resBody, &resHttp)
 
-		assert.Equalf(t, http.StatusOK, res.StatusCode, string(resBody))
+		assert.Equalf(t, http.StatusOK, resHttp.Status, string(resBody))
 	})
 }
 
 func TestJoin(t *testing.T) {
-	err := database.Connect()
-	if err != nil {
+	if err := database.Connect(); err != nil {
 		panic("Can't connect database.")
 	}
+
 	app := routes.New()
 
 	type args struct {
@@ -195,11 +204,14 @@ func TestJoin(t *testing.T) {
 			reqLogin, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(loginBody))
 			reqLogin.Header.Set("Content-Type", "application/json")
 
-			var login = new(user.ResponseAuth)
+			resHttp := new(response.HTTP)
+			login := new(user.ResponseAuth)
 			resLogin, _ := app.Test(reqLogin, -1)
 			defer resLogin.Body.Close()
 			resBodyLogin, _ := ioutil.ReadAll(resLogin.Body)
-			json.Unmarshal(resBodyLogin, &login)
+			json.Unmarshal(resBodyLogin, &resHttp)
+			loginJson, _ := json.Marshal(resHttp.Data)
+			json.Unmarshal(loginJson, &login)
 
 			reqBody, _ := json.Marshal(tt.args.data)
 			req, _ := http.NewRequest(http.MethodPost, "/api/v1/join-groups", bytes.NewBuffer(reqBody))
@@ -209,17 +221,18 @@ func TestJoin(t *testing.T) {
 			res, _ := app.Test(req, -1)
 			defer res.Body.Close()
 			resBody, _ := ioutil.ReadAll(res.Body)
+			json.Unmarshal(resBody, &resHttp)
 
-			assert.Equalf(t, tt.args.statusCode, res.StatusCode, string(resBody))
+			assert.Equalf(t, tt.args.statusCode, resHttp.Status, string(resBody))
 		})
 	}
 }
 
 func TestLeave(t *testing.T) {
-	err := database.Connect()
-	if err != nil {
+	if err := database.Connect(); err != nil {
 		panic("Can't connect database.")
 	}
+
 	app := routes.New()
 
 	type args struct {
@@ -282,11 +295,14 @@ func TestLeave(t *testing.T) {
 			reqLogin, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(loginBody))
 			reqLogin.Header.Set("Content-Type", "application/json")
 
-			var login = new(user.ResponseAuth)
+			resHttp := new(response.HTTP)
+			login := new(user.ResponseAuth)
 			resLogin, _ := app.Test(reqLogin, -1)
 			defer resLogin.Body.Close()
 			resBodyLogin, _ := ioutil.ReadAll(resLogin.Body)
-			json.Unmarshal(resBodyLogin, &login)
+			json.Unmarshal(resBodyLogin, &resHttp)
+			loginJson, _ := json.Marshal(resHttp.Data)
+			json.Unmarshal(loginJson, &login)
 
 			reqBody, _ := json.Marshal(tt.args.data)
 			req, _ := http.NewRequest(http.MethodPost, "/api/v1/leave-groups", bytes.NewBuffer(reqBody))
@@ -296,8 +312,9 @@ func TestLeave(t *testing.T) {
 			res, _ := app.Test(req, -1)
 			defer res.Body.Close()
 			resBody, _ := ioutil.ReadAll(res.Body)
+			json.Unmarshal(resBody, &resHttp)
 
-			assert.Equalf(t, tt.args.statusCode, res.StatusCode, string(resBody))
+			assert.Equalf(t, tt.args.statusCode, resHttp.Status, string(resBody))
 
 			if tt.args.statusCode == http.StatusOK {
 				endpoint := fmt.Sprintf("/api/v1/users/%d", login.User.ID)

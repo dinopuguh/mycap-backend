@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"testing"
 
@@ -117,14 +116,11 @@ func TestNew(t *testing.T) {
 				auth := new(user.ResponseAuth)
 				authJson, _ := json.Marshal(resHttp.Data)
 				json.Unmarshal(authJson, &auth)
-				log.Printf("USER : %v\n", auth.User)
 
 				if tt.args.willUpdate {
 					updatedUser = &auth.User
-					log.Printf("USER ID: %d\n", updatedUser.ID)
 				} else {
 					createdUser = &auth.User
-					log.Printf("USER ID: %d\n", createdUser.ID)
 				}
 			}
 		})

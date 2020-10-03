@@ -54,7 +54,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/dinopuguh/mycap-backend/services/group/group.go (96.9%)</option>
+				<option value="file0">github.com/dinopuguh/mycap-backend/services/group/group.go (97.1%)</option>
 				
 				</select>
 			</div>
@@ -105,21 +105,26 @@ const (
 // @Tags groups
 // @Accept json
 // @Produce json
-// @Success 200 {object} []Group
-// @Failure 503 {object} response.HTTPError
+// @Success 200 {object} response.HTTP
+// @Failure 200 {object} response.HTTP
 // @Router /v1/groups [get]
 func GetAll(c *fiber.Ctx) error <span class="cov8" title="1">{
         db := database.DBConn
 
         var groups []Group
         if res := db.Preload("Admin").Preload("Participants").Find(&amp;groups); res.Error != nil </span><span class="cov0" title="0">{
-                return c.Status(http.StatusServiceUnavailable).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusServiceUnavailable,
                         Message: res.Error.Error(),
                 })
         }</span>
 
-        <span class="cov8" title="1">return c.JSON(groups)</span>
+        <span class="cov8" title="1">return c.JSON(response.HTTP{
+                Success: true,
+                Data:    groups,
+                Status:  http.StatusOK,
+                Message: "Success get all groups.",
+        })</span>
 }
 
 // New function creates a group/conference for communicate with deaf people
@@ -129,10 +134,9 @@ func GetAll(c *fiber.Ctx) error <span class="cov8" title="1">{
 // @Accept json
 // @Produce json
 // @Param group body CreateGroup true "Create group"
-// @Success 200 {object} Group
-// @Failure 400 {object} response.HTTPError
+// @Success 200 {object} response.HTTP
+// @Failure 200 {object} response.HTTP
 // @Failure 401 {object} string
-// @Failure 503 {object} response.HTTPError
 // @Security ApiKeyAuth
 // @Router /v1/groups [post]
 func New(c *fiber.Ctx) error <span class="cov8" title="1">{
@@ -147,14 +151,14 @@ func New(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         var existingGroup = new(Group)
         if res := db.Where("admin_id = ?", admin.ID).First(&amp;existingGroup); res.RowsAffected != 0 </span><span class="cov8" title="1">{
-                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusBadRequest,
                         Message: "You are already has a group chat or conference.",
                 })
         }</span>
 
         <span class="cov8" title="1">if admin.ReachedTimeLimit </span><span class="cov8" title="1">{
-                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusBadRequest,
                         Message: "This user already reached time limit this month.",
                 })
@@ -167,7 +171,7 @@ func New(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         createGroup := new(CreateGroup)
         if err := c.BodyParser(&amp;createGroup); err != nil </span><span class="cov8" title="1">{
-                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusBadRequest,
                         Message: err.Error(),
                 })
@@ -178,7 +182,7 @@ func New(c *fiber.Ctx) error <span class="cov8" title="1">{
         group.Participants = participants
 
         if createGroup.Type != GroupType &amp;&amp; createGroup.Type != ConferenceType </span><span class="cov8" title="1">{
-                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusBadRequest,
                         Message: "Group type not specified.",
                 })
@@ -187,13 +191,18 @@ func New(c *fiber.Ctx) error <span class="cov8" title="1">{
         <span class="cov8" title="1">group.Type = createGroup.Type
 
         if res := db.Create(group); res.Error != nil </span><span class="cov0" title="0">{
-                return c.Status(http.StatusServiceUnavailable).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusServiceUnavailable,
                         Message: res.Error.Error(),
                 })
         }</span>
 
-        <span class="cov8" title="1">return c.JSON(group)</span>
+        <span class="cov8" title="1">return c.JSON(response.HTTP{
+                Success: true,
+                Data:    group,
+                Status:  http.StatusOK,
+                Message: "Success create a new group.",
+        })</span>
 }
 
 // Join function assign an user to specific group
@@ -203,10 +212,9 @@ func New(c *fiber.Ctx) error <span class="cov8" title="1">{
 // @Accept json
 // @Produce json
 // @Param group body JoinGroup true "Join group"
-// @Success 200 {object} Group
-// @Failure 400 {object} response.HTTPError
-// @Failure 404 {object} response.HTTPError
-// @Failure 503 {object} response.HTTPError
+// @Success 200 {object} response.HTTP
+// @Failure 200 {object} response.HTTP
+// @Failure 401 {object} string
 // @Security ApiKeyAuth
 // @Router /v1/join-groups [post]
 func Join(c *fiber.Ctx) error <span class="cov8" title="1">{
@@ -221,7 +229,7 @@ func Join(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         joinGroup := new(JoinGroup)
         if err := c.BodyParser(&amp;joinGroup); err != nil </span><span class="cov8" title="1">{
-                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusBadRequest,
                         Message: err.Error(),
                 })
@@ -229,7 +237,7 @@ func Join(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         <span class="cov8" title="1">var group = new(Group)
         if res := db.Where("admin_username = ?", joinGroup.AdminUsername).First(&amp;group); res.RowsAffected == 0 </span><span class="cov8" title="1">{
-                return c.Status(http.StatusNotFound).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusNotFound,
                         Message: "Group not found.",
                 })
@@ -241,7 +249,12 @@ func Join(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         db.Preload("Admin").Preload("Participants").First(&amp;group, group.ID)
 
-        return c.JSON(group)</span>
+        return c.JSON(response.HTTP{
+                Success: true,
+                Data:    group,
+                Status:  http.StatusOK,
+                Message: "Success joining a group.",
+        })</span>
 }
 
 // Leave function remove an user from specific group
@@ -251,10 +264,9 @@ func Join(c *fiber.Ctx) error <span class="cov8" title="1">{
 // @Accept json
 // @Produce json
 // @Param group body LeaveGroup true "Leave group"
-// @Success 200 {object} Group
-// @Failure 400 {object} response.HTTPError
-// @Failure 404 {object} response.HTTPError
-// @Failure 503 {object} response.HTTPError
+// @Success 200 {object} response.HTTP
+// @Failure 200 {object} response.HTTP
+// @Failure 401 {object} string
 // @Security ApiKeyAuth
 // @Router /v1/leave-groups [post]
 func Leave(c *fiber.Ctx) error <span class="cov8" title="1">{
@@ -269,7 +281,7 @@ func Leave(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         leaveGroup := new(LeaveGroup)
         if err := c.BodyParser(&amp;leaveGroup); err != nil </span><span class="cov8" title="1">{
-                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusBadRequest,
                         Message: err.Error(),
                 })
@@ -277,21 +289,32 @@ func Leave(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         <span class="cov8" title="1">var group = new(Group)
         if res := db.Preload("Admin").Where("admin_username = ?", leaveGroup.AdminUsername).First(&amp;group); res.RowsAffected == 0 </span><span class="cov8" title="1">{
-                return c.Status(http.StatusNotFound).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusNotFound,
                         Message: "Group not found.",
                 })
         }</span>
 
         <span class="cov8" title="1">if group.AdminID == leavingUser.ID </span><span class="cov8" title="1">{
+                leavingUser.RemainingTime = leaveGroup.RemainingTime
+                if leaveGroup.RemainingTime == 0 </span><span class="cov8" title="1">{
+                        leavingUser.ReachedTimeLimit = true
+                }</span>
+                <span class="cov8" title="1">db.Save(&amp;leavingUser)
+
                 db.Model(&amp;group).Association("Participants").Clear()
-                db.Delete(&amp;group)
-        }</span> else<span class="cov8" title="1"> {
+                db.Delete(&amp;group)</span>
+        } else<span class="cov8" title="1"> {
                 db.Model(&amp;group).Association("Participants").Delete(leavingUser)
                 db.Preload("Admin").Preload("Participants").First(&amp;group, group.ID)
         }</span>
 
-        <span class="cov8" title="1">return c.JSON(group)</span>
+        <span class="cov8" title="1">return c.JSON(response.HTTP{
+                Success: true,
+                Data:    group,
+                Status:  http.StatusOK,
+                Message: "Success leaving group.",
+        })</span>
 }
 </pre>
 		
