@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"testing"
 
 	"github.com/dinopuguh/mycap-backend/database"
+	"github.com/dinopuguh/mycap-backend/response"
 	"github.com/dinopuguh/mycap-backend/routes"
 	"github.com/dinopuguh/mycap-backend/services/user"
 	"github.com/stretchr/testify/assert"
@@ -20,10 +22,10 @@ var (
 )
 
 func TestNew(t *testing.T) {
-	err := database.Connect()
-	if err != nil {
+	if err := database.Connect(); err != nil {
 		panic("Can't connect database.")
 	}
+
 	app := routes.New()
 
 	type args struct {
@@ -103,22 +105,26 @@ func TestNew(t *testing.T) {
 			req, _ := http.NewRequest(http.MethodPost, "/api/v1/register", bytes.NewBuffer(reqBody))
 			req.Header.Set("Content-Type", tt.args.contentType)
 
+			resHttp := new(response.HTTP)
 			res, _ := app.Test(req, -1)
 			defer res.Body.Close()
 			resBody, _ := ioutil.ReadAll(res.Body)
+			json.Unmarshal(resBody, &resHttp)
 
-			assert.Equalf(t, tt.args.statusCode, res.StatusCode, string(resBody))
+			assert.Equalf(t, tt.args.statusCode, resHttp.Status, string(resBody))
 
 			if tt.args.statusCode == http.StatusOK {
-				rb := user.ResponseAuth{}
-				json.Unmarshal(resBody, &rb)
-
-				userJson, _ := json.Marshal(rb.User)
+				auth := new(user.ResponseAuth)
+				authJson, _ := json.Marshal(resHttp.Data)
+				json.Unmarshal(authJson, &auth)
+				log.Printf("USER : %v\n", auth.User)
 
 				if tt.args.willUpdate {
-					json.Unmarshal(userJson, &updatedUser)
+					updatedUser = &auth.User
+					log.Printf("USER ID: %d\n", updatedUser.ID)
 				} else {
-					json.Unmarshal(userJson, &createdUser)
+					createdUser = &auth.User
+					log.Printf("USER ID: %d\n", createdUser.ID)
 				}
 			}
 		})
@@ -131,6 +137,7 @@ func TestUpdate(t *testing.T) {
 	}
 
 	app := routes.New()
+
 	type args struct {
 		data        user.UpdateUser
 		login       user.LoginUser
@@ -190,11 +197,14 @@ func TestUpdate(t *testing.T) {
 			reqLogin, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(loginBody))
 			reqLogin.Header.Set("Content-Type", "application/json")
 
-			var login = new(user.ResponseAuth)
+			resHttp := new(response.HTTP)
+			login := new(user.ResponseAuth)
 			resLogin, _ := app.Test(reqLogin, -1)
 			defer resLogin.Body.Close()
 			resBodyLogin, _ := ioutil.ReadAll(resLogin.Body)
-			json.Unmarshal(resBodyLogin, &login)
+			json.Unmarshal(resBodyLogin, &resHttp)
+			loginJson, _ := json.Marshal(resHttp.Data)
+			json.Unmarshal(loginJson, &login)
 
 			reqBody, _ := json.Marshal(tt.args.data)
 			endpoint := fmt.Sprintf("/api/v1/users/%d", tt.args.userID)
@@ -205,35 +215,39 @@ func TestUpdate(t *testing.T) {
 			res, _ := app.Test(req, -1)
 			defer res.Body.Close()
 			resBody, _ := ioutil.ReadAll(res.Body)
+			json.Unmarshal(resBody, &resHttp)
 
-			assert.Equalf(t, tt.args.statusCode, res.StatusCode, string(resBody))
+			assert.Equalf(t, tt.args.statusCode, resHttp.Status, string(resBody))
 		})
 	}
 }
 
 func TestGetAll(t *testing.T) {
-	err := database.Connect()
-	if err != nil {
+	if err := database.Connect(); err != nil {
 		panic("Can't connect database.")
 	}
-	router := routes.New()
+
+	app := routes.New()
+
 	t.Run("Get all users", func(t *testing.T) {
 		req, _ := http.NewRequest(http.MethodGet, "/api/v1/users", nil)
 
-		res, _ := router.Test(req, -1)
+		resHttp := new(response.HTTP)
+		res, _ := app.Test(req, -1)
 		defer res.Body.Close()
 		resBody, _ := ioutil.ReadAll(res.Body)
+		json.Unmarshal(resBody, &resHttp)
 
-		assert.Equalf(t, http.StatusOK, res.StatusCode, string(resBody))
+		assert.Equalf(t, http.StatusOK, resHttp.Status, string(resBody))
 	})
 }
 
 func TestLogin(t *testing.T) {
-	err := database.Connect()
-	if err != nil {
+	if err := database.Connect(); err != nil {
 		panic("Can't connect database.")
 	}
-	r := routes.New()
+
+	app := routes.New()
 
 	type args struct {
 		data        user.LoginUser
@@ -282,20 +296,22 @@ func TestLogin(t *testing.T) {
 			req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(reqBody))
 			req.Header.Set("Content-Type", tt.args.contentType)
 
-			res, _ := r.Test(req, -1)
+			resHttp := new(response.HTTP)
+			res, _ := app.Test(req, -1)
 			resBody, _ := ioutil.ReadAll(res.Body)
+			json.Unmarshal(resBody, &resHttp)
 
-			assert.Equalf(t, tt.args.statusCode, res.StatusCode, string(resBody))
+			assert.Equalf(t, tt.args.statusCode, resHttp.Status, string(resBody))
 		})
 	}
 }
 
 func TestDelete(t *testing.T) {
-	err := database.Connect()
-	if err != nil {
+	if err := database.Connect(); err != nil {
 		panic("Can't connect database.")
 	}
-	r := routes.New()
+
+	app := routes.New()
 
 	type args struct {
 		userID     uint
@@ -319,10 +335,12 @@ func TestDelete(t *testing.T) {
 			endpoint := fmt.Sprintf("/api/v1/users/%d", tt.args.userID)
 			req, _ := http.NewRequest(http.MethodDelete, endpoint, nil)
 
-			res, _ := r.Test(req, -1)
+			resHttp := new(response.HTTP)
+			res, _ := app.Test(req, -1)
 			resBody, _ := ioutil.ReadAll(res.Body)
+			json.Unmarshal(resBody, &resHttp)
 
-			assert.Equalf(t, tt.args.statusCode, res.StatusCode, string(resBody))
+			assert.Equalf(t, tt.args.statusCode, resHttp.Status, string(resBody))
 		})
 	}
 }

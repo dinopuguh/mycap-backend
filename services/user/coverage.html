@@ -95,16 +95,15 @@ type ResponseAuth struct {
 // @Accept json
 // @Produce json
 // @Param user body RegisterUser true "Register user"
-// @Success 200 {object} ResponseAuth
-// @Failure 400 {object} response.HTTPError
-// @Failure 503 {object} response.HTTPError
+// @Success 200 {object} response.HTTP
+// @Failure 200 {object} response.HTTP
 // @Router /v1/register [post]
 func New(c *fiber.Ctx) error <span class="cov8" title="1">{
         db := database.DBConn
 
         user := new(User)
         if err := c.BodyParser(&amp;user); err != nil </span><span class="cov8" title="1">{
-                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusBadRequest,
                         Message: err.Error(),
                 })
@@ -112,14 +111,14 @@ func New(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         <span class="cov8" title="1">var currentUser User
         if res := db.Where("email = ?", user.Email).First(&amp;currentUser); res.RowsAffected &gt; 0 </span><span class="cov8" title="1">{
-                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusBadRequest,
                         Message: "User with this email is already exist.",
                 })
         }</span>
 
         <span class="cov8" title="1">if res := db.Where("username = ?", user.Username).First(&amp;currentUser); res.RowsAffected &gt; 0 </span><span class="cov8" title="1">{
-                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusBadRequest,
                         Message: "User with this username is already exist.",
                 })
@@ -128,14 +127,14 @@ func New(c *fiber.Ctx) error <span class="cov8" title="1">{
         <span class="cov8" title="1">var err error
         user.Password, err = helpers.HashPassword(user.Password)
         if err != nil </span><span class="cov0" title="0">{
-                return c.Status(http.StatusServiceUnavailable).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusServiceUnavailable,
                         Message: err.Error(),
                 })
         }</span>
 
         <span class="cov8" title="1">if res := db.Create(user); res.Error != nil </span><span class="cov0" title="0">{
-                return c.Status(http.StatusServiceUnavailable).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusServiceUnavailable,
                         Message: res.Error.Error(),
                 })
@@ -143,15 +142,20 @@ func New(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         <span class="cov8" title="1">token, err := auth.GenerateJWT(user.Name, user.Email)
         if err != nil </span><span class="cov0" title="0">{
-                return c.Status(http.StatusServiceUnavailable).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusServiceUnavailable,
                         Message: err.Error(),
                 })
         }</span>
 
-        <span class="cov8" title="1">return c.JSON(ResponseAuth{
-                User:        *user,
-                AccessToken: token,
+        <span class="cov8" title="1">return c.JSON(response.HTTP{
+                Success: true,
+                Data: ResponseAuth{
+                        User:        *user,
+                        AccessToken: token,
+                },
+                Status:  http.StatusOK,
+                Message: "Success register.",
         })</span>
 }
 
@@ -162,18 +166,15 @@ func New(c *fiber.Ctx) error <span class="cov8" title="1">{
 // @Accept json
 // @Produce json
 // @Param user body LoginUser true "User login"
-// @Success 200 {object} ResponseAuth
-// @Failure 400 {object} response.HTTPError
-// @Failure 401 {object} response.HTTPError
-// @Failure 404 {object} response.HTTPError
-// @Failure 503 {object} response.HTTPError
+// @Success 200 {object} response.HTTP
+// @Failure 200 {object} response.HTTP
 // @Router /v1/login [post]
 func Login(c *fiber.Ctx) error <span class="cov8" title="1">{
         db := database.DBConn
 
         login := new(LoginUser)
         if err := c.BodyParser(&amp;login); err != nil </span><span class="cov8" title="1">{
-                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusBadRequest,
                         Message: err.Error(),
                 })
@@ -181,14 +182,14 @@ func Login(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         <span class="cov8" title="1">var user User
         if res := db.Where("email = ?", login.Email).First(&amp;user); res.RowsAffected == 0 </span><span class="cov8" title="1">{
-                return c.Status(http.StatusNotFound).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusNotFound,
                         Message: "User with this email not found.",
                 })
         }</span>
 
         <span class="cov8" title="1">if !helpers.CheckPasswordHash(login.Password, user.Password) </span><span class="cov8" title="1">{
-                return c.Status(http.StatusUnauthorized).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusUnauthorized,
                         Message: "Password incorrect.",
                 })
@@ -196,15 +197,20 @@ func Login(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         <span class="cov8" title="1">token, err := auth.GenerateJWT(user.Name, user.Email)
         if err != nil </span><span class="cov0" title="0">{
-                return c.Status(http.StatusServiceUnavailable).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusServiceUnavailable,
                         Message: err.Error(),
                 })
         }</span>
 
-        <span class="cov8" title="1">return c.JSON(ResponseAuth{
-                User:        user,
-                AccessToken: token,
+        <span class="cov8" title="1">return c.JSON(response.HTTP{
+                Success: true,
+                Data: ResponseAuth{
+                        User:        user,
+                        AccessToken: token,
+                },
+                Status:  http.StatusOK,
+                Message: "Success login.",
         })</span>
 }
 </pre>
@@ -238,21 +244,26 @@ type User struct {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Success 200 {object} []User
-// @Failure 503 {object} response.HTTPError
+// @Success 200 {object} response.HTTP
+// @Failure 200 {object} response.HTTP
 // @Router /v1/users [get]
 func GetAll(c *fiber.Ctx) error <span class="cov8" title="1">{
         db := database.DBConn
 
         var users []User
         if res := db.Find(&amp;users); res.Error != nil </span><span class="cov0" title="0">{
-                return c.Status(http.StatusServiceUnavailable).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusServiceUnavailable,
                         Message: res.Error.Error(),
                 })
         }</span>
 
-        <span class="cov8" title="1">return c.JSON(users)</span>
+        <span class="cov8" title="1">return c.JSON(response.HTTP{
+                Success: true,
+                Data:    users,
+                Status:  http.StatusOK,
+                Message: "Success get all users.",
+        })</span>
 }
 
 // Update function edit an user by ID
@@ -262,9 +273,8 @@ func GetAll(c *fiber.Ctx) error <span class="cov8" title="1">{
 // @Accept json
 // @Produce json
 // @Param user body UpdateUser true "Update user"
-// @Success 200 {object} User
-// @Failure 400 {object} response.HTTPError
-// @Failure 404 {object} response.HTTPError
+// @Success 200 {object} response.HTTP
+// @Failure 200 {object} response.HTTP
 // @Router /v1/users [put]
 func Update(c *fiber.Ctx) error <span class="cov8" title="1">{
         id := c.Params("id")
@@ -272,7 +282,7 @@ func Update(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         var user User
         if res := db.First(&amp;user, id); res.RowsAffected == 0 </span><span class="cov8" title="1">{
-                return c.Status(http.StatusNotFound).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusNotFound,
                         Message: fmt.Sprintf("User with ID %v not found.", id),
                 })
@@ -280,7 +290,7 @@ func Update(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         <span class="cov8" title="1">updatedUser := new(UpdateUser)
         if err := c.BodyParser(&amp;updatedUser); err != nil </span><span class="cov8" title="1">{
-                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusBadRequest,
                         Message: err.Error(),
                 })
@@ -292,7 +302,12 @@ func Update(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         db.Save(&amp;user)
 
-        return c.JSON(user)</span>
+        return c.JSON(response.HTTP{
+                Success: true,
+                Data:    user,
+                Status:  http.StatusOK,
+                Message: "Success update user.",
+        })</span>
 }
 
 // Delete function removes an user by ID
@@ -302,8 +317,8 @@ func Update(c *fiber.Ctx) error <span class="cov8" title="1">{
 // @Accept json
 // @Produce json
 // @Param id path int true "User ID"
-// @Success 200 {object} response.HTTPError
-// @Failure 503 {object} response.HTTPError
+// @Success 200 {object} response.HTTP
+// @Failure 200 {object} response.HTTP
 // @Router /v1/users/{id} [delete]
 func Delete(c *fiber.Ctx) error <span class="cov8" title="1">{
         id := c.Params("id")
@@ -311,22 +326,23 @@ func Delete(c *fiber.Ctx) error <span class="cov8" title="1">{
 
         var user User
         if res := db.First(&amp;user, id); res.RowsAffected == 0 </span><span class="cov8" title="1">{
-                return c.Status(http.StatusNotFound).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusNotFound,
                         Message: fmt.Sprintf("User with ID %v not found.", id),
                 })
         }</span>
 
         <span class="cov8" title="1">if res := db.Delete(&amp;user); res.Error != nil </span><span class="cov0" title="0">{
-                return c.Status(http.StatusServiceUnavailable).JSON(response.HTTPError{
+                return c.JSON(response.HTTP{
                         Status:  http.StatusServiceUnavailable,
                         Message: res.Error.Error(),
                 })
         }</span>
 
-        <span class="cov8" title="1">return c.JSON(response.HTTPError{
+        <span class="cov8" title="1">return c.JSON(response.HTTP{
+                Success: true,
                 Status:  http.StatusOK,
-                Message: "User deleted.",
+                Message: "Success delete user.",
         })</span>
 }
 </pre>
