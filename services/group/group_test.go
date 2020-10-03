@@ -99,14 +99,14 @@ func TestNew(t *testing.T) {
 			reqLogin, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(loginBody))
 			reqLogin.Header.Set("Content-Type", "application/json")
 
-			resHttp := new(response.HTTP)
+			resHTTP := new(response.HTTP)
 			login := new(user.ResponseAuth)
 			resLogin, _ := app.Test(reqLogin, -1)
 			defer resLogin.Body.Close()
 			resBodyLogin, _ := ioutil.ReadAll(resLogin.Body)
-			json.Unmarshal(resBodyLogin, &resHttp)
-			loginJson, _ := json.Marshal(resHttp.Data)
-			json.Unmarshal(loginJson, &login)
+			json.Unmarshal(resBodyLogin, &resHTTP)
+			loginJSON, _ := json.Marshal(resHTTP.Data)
+			json.Unmarshal(loginJSON, &login)
 
 			reqBody, _ := json.Marshal(tt.args.data)
 			req, _ := http.NewRequest(http.MethodPost, "/api/v1/groups", bytes.NewBuffer(reqBody))
@@ -116,13 +116,13 @@ func TestNew(t *testing.T) {
 			res, _ := app.Test(req, -1)
 			defer res.Body.Close()
 			resBody, _ := ioutil.ReadAll(res.Body)
-			json.Unmarshal(resBody, &resHttp)
+			json.Unmarshal(resBody, &resHTTP)
 
-			assert.Equalf(t, tt.args.statusCode, resHttp.Status, string(resBody))
+			assert.Equalf(t, tt.args.statusCode, resHTTP.Status, string(resBody))
 
 			if tt.args.statusCode == http.StatusOK {
-				groupJson, _ := json.Marshal(resHttp.Data)
-				json.Unmarshal(groupJson, &createdGroup)
+				groupJSON, _ := json.Marshal(resHTTP.Data)
+				json.Unmarshal(groupJSON, &createdGroup)
 			}
 		})
 	}
@@ -138,13 +138,13 @@ func TestGetAll(t *testing.T) {
 	t.Run("Get all groups", func(t *testing.T) {
 		req, _ := http.NewRequest(http.MethodGet, "/api/v1/groups", nil)
 
-		resHttp := new(response.HTTP)
+		resHTTP := new(response.HTTP)
 		res, _ := app.Test(req, -1)
 		defer res.Body.Close()
 		resBody, _ := ioutil.ReadAll(res.Body)
-		json.Unmarshal(resBody, &resHttp)
+		json.Unmarshal(resBody, &resHTTP)
 
-		assert.Equalf(t, http.StatusOK, resHttp.Status, string(resBody))
+		assert.Equalf(t, http.StatusOK, resHTTP.Status, string(resBody))
 	})
 }
 
@@ -204,14 +204,14 @@ func TestJoin(t *testing.T) {
 			reqLogin, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(loginBody))
 			reqLogin.Header.Set("Content-Type", "application/json")
 
-			resHttp := new(response.HTTP)
+			resHTTP := new(response.HTTP)
 			login := new(user.ResponseAuth)
 			resLogin, _ := app.Test(reqLogin, -1)
 			defer resLogin.Body.Close()
 			resBodyLogin, _ := ioutil.ReadAll(resLogin.Body)
-			json.Unmarshal(resBodyLogin, &resHttp)
-			loginJson, _ := json.Marshal(resHttp.Data)
-			json.Unmarshal(loginJson, &login)
+			json.Unmarshal(resBodyLogin, &resHTTP)
+			loginJSON, _ := json.Marshal(resHTTP.Data)
+			json.Unmarshal(loginJSON, &login)
 
 			reqBody, _ := json.Marshal(tt.args.data)
 			req, _ := http.NewRequest(http.MethodPost, "/api/v1/join-groups", bytes.NewBuffer(reqBody))
@@ -221,9 +221,9 @@ func TestJoin(t *testing.T) {
 			res, _ := app.Test(req, -1)
 			defer res.Body.Close()
 			resBody, _ := ioutil.ReadAll(res.Body)
-			json.Unmarshal(resBody, &resHttp)
+			json.Unmarshal(resBody, &resHTTP)
 
-			assert.Equalf(t, tt.args.statusCode, resHttp.Status, string(resBody))
+			assert.Equalf(t, tt.args.statusCode, resHTTP.Status, string(resBody))
 		})
 	}
 }
@@ -295,14 +295,14 @@ func TestLeave(t *testing.T) {
 			reqLogin, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(loginBody))
 			reqLogin.Header.Set("Content-Type", "application/json")
 
-			resHttp := new(response.HTTP)
+			resHTTP := new(response.HTTP)
 			login := new(user.ResponseAuth)
 			resLogin, _ := app.Test(reqLogin, -1)
 			defer resLogin.Body.Close()
 			resBodyLogin, _ := ioutil.ReadAll(resLogin.Body)
-			json.Unmarshal(resBodyLogin, &resHttp)
-			loginJson, _ := json.Marshal(resHttp.Data)
-			json.Unmarshal(loginJson, &login)
+			json.Unmarshal(resBodyLogin, &resHTTP)
+			loginJSON, _ := json.Marshal(resHTTP.Data)
+			json.Unmarshal(loginJSON, &login)
 
 			reqBody, _ := json.Marshal(tt.args.data)
 			req, _ := http.NewRequest(http.MethodPost, "/api/v1/leave-groups", bytes.NewBuffer(reqBody))
@@ -312,9 +312,9 @@ func TestLeave(t *testing.T) {
 			res, _ := app.Test(req, -1)
 			defer res.Body.Close()
 			resBody, _ := ioutil.ReadAll(res.Body)
-			json.Unmarshal(resBody, &resHttp)
+			json.Unmarshal(resBody, &resHTTP)
 
-			assert.Equalf(t, tt.args.statusCode, resHttp.Status, string(resBody))
+			assert.Equalf(t, tt.args.statusCode, resHTTP.Status, string(resBody))
 
 			if tt.args.statusCode == http.StatusOK {
 				endpoint := fmt.Sprintf("/api/v1/users/%d", login.User.ID)
