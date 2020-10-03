@@ -4,13 +4,16 @@
 # Coverage test
 
 set -e
-go test ./services/user/... -covermode=count -coverprofile=cover.out
-go test ./services/user/... -json > test-report.out
-go test ./services/user/... -coverprofile=coverage.out
 
-go test ./services/group/... -covermode=count -coverprofile=cover.out
-go test ./services/group/... -json > test-report.out
-go test ./services/group/... -coverprofile=coverage.out
+echo "mode: count" > coverage.out
 
-go tool cover -func=cover.out
-$GOPATH/bin/goveralls -coverprofile=cover.out -service=travis-ci
+go test -v -covermode=count -coverprofile=profile.out ./services/user/...
+cat profile.out | grep -v "mode: count" >> coverage.out
+
+go test -v -covermode=count -coverprofile=profile.out ./services/group/...
+cat profile.out | grep -v "mode: count" >> coverage.out
+
+$GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
+
+rm -rf ./coverage.out
+rm -rf ./profile.out
