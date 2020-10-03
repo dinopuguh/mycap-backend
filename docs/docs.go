@@ -48,16 +48,22 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/group.Group"
-                            }
-                        }
-                    },
-                    "503": {
-                        "description": "Service Unavailable",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTP"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/group.Group"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -94,25 +100,19 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/group.Group"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "503": {
-                        "description": "Service Unavailable",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTP"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/group.Group"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -151,25 +151,19 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/group.Group"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
-                        }
-                    },
-                    "503": {
-                        "description": "Service Unavailable",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTP"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/group.Group"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -208,25 +202,19 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/group.Group"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
-                        }
-                    },
-                    "503": {
-                        "description": "Service Unavailable",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTP"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/group.Group"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -260,31 +248,19 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/user.ResponseAuth"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
-                        }
-                    },
-                    "503": {
-                        "description": "Service Unavailable",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTP"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/user.ResponseAuth"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -318,19 +294,19 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/user.ResponseAuth"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
-                        }
-                    },
-                    "503": {
-                        "description": "Service Unavailable",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTP"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/user.ResponseAuth"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -353,16 +329,66 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/user.User"
-                            }
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTP"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/user.User"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
-                    },
-                    "503": {
-                        "description": "Service Unavailable",
+                    }
+                }
+            },
+            "put": {
+                "description": "Update user by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update user by ID",
+                "parameters": [
+                    {
+                        "description": "Update user",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
+                            "$ref": "#/definitions/user.UpdateUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.HTTP"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/user.User"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -394,13 +420,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
-                        }
-                    },
-                    "503": {
-                        "description": "Service Unavailable",
-                        "schema": {
-                            "$ref": "#/definitions/response.HTTPError"
+                            "$ref": "#/definitions/response.HTTP"
                         }
                     }
                 }
@@ -453,17 +473,26 @@ var doc = `{
             "properties": {
                 "admin_username": {
                     "type": "string"
+                },
+                "remaining_time": {
+                    "type": "integer"
                 }
             }
         },
-        "response.HTTPError": {
+        "response.HTTP": {
             "type": "object",
             "properties": {
+                "data": {
+                    "type": "object"
+                },
                 "message": {
                     "type": "string"
                 },
                 "status": {
                     "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
                 }
             }
         },
@@ -510,6 +539,23 @@ var doc = `{
                 "user": {
                     "type": "object",
                     "$ref": "#/definitions/user.User"
+                }
+            }
+        },
+        "user.UpdateUser": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "Dino Puguh"
+                },
+                "reached_time_limit": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "remaining_time": {
+                    "type": "integer",
+                    "example": 1800
                 }
             }
         },

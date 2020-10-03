@@ -30,13 +30,19 @@ definitions:
     properties:
       admin_username:
         type: string
+      remaining_time:
+        type: integer
     type: object
-  response.HTTPError:
+  response.HTTP:
     properties:
+      data:
+        type: object
       message:
         type: string
       status:
         type: integer
+      success:
+        type: boolean
     type: object
   user.LoginUser:
     properties:
@@ -69,6 +75,18 @@ definitions:
       user:
         $ref: '#/definitions/user.User'
         type: object
+    type: object
+  user.UpdateUser:
+    properties:
+      name:
+        example: Dino Puguh
+        type: string
+      reached_time_limit:
+        example: false
+        type: boolean
+      remaining_time:
+        example: 1800
+        type: integer
     type: object
   user.User:
     properties:
@@ -108,13 +126,14 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/group.Group'
-            type: array
-        "503":
-          description: Service Unavailable
-          schema:
-            $ref: '#/definitions/response.HTTPError'
+            allOf:
+            - $ref: '#/definitions/response.HTTP'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/group.Group'
+                  type: array
+              type: object
       summary: Get all groups
       tags:
       - groups
@@ -135,19 +154,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/group.Group'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.HTTPError'
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "503":
-          description: Service Unavailable
-          schema:
-            $ref: '#/definitions/response.HTTPError'
+            allOf:
+            - $ref: '#/definitions/response.HTTP'
+            - properties:
+                data:
+                  $ref: '#/definitions/group.Group'
+              type: object
       security:
       - ApiKeyAuth: []
       summary: Create a group chat or conference
@@ -171,19 +183,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/group.Group'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/response.HTTPError'
-        "503":
-          description: Service Unavailable
-          schema:
-            $ref: '#/definitions/response.HTTPError'
+            allOf:
+            - $ref: '#/definitions/response.HTTP'
+            - properties:
+                data:
+                  $ref: '#/definitions/group.Group'
+              type: object
       security:
       - ApiKeyAuth: []
       summary: Joining group chat or conference
@@ -207,19 +212,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/group.Group'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/response.HTTPError'
-        "503":
-          description: Service Unavailable
-          schema:
-            $ref: '#/definitions/response.HTTPError'
+            allOf:
+            - $ref: '#/definitions/response.HTTP'
+            - properties:
+                data:
+                  $ref: '#/definitions/group.Group'
+              type: object
       security:
       - ApiKeyAuth: []
       summary: Leaving group chat or conference
@@ -243,23 +241,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/user.ResponseAuth'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.HTTPError'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/response.HTTPError'
-        "503":
-          description: Service Unavailable
-          schema:
-            $ref: '#/definitions/response.HTTPError'
+            allOf:
+            - $ref: '#/definitions/response.HTTP'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.ResponseAuth'
+              type: object
       summary: User login
       tags:
       - auth
@@ -281,15 +268,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/user.ResponseAuth'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.HTTPError'
-        "503":
-          description: Service Unavailable
-          schema:
-            $ref: '#/definitions/response.HTTPError'
+            allOf:
+            - $ref: '#/definitions/response.HTTP'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.ResponseAuth'
+              type: object
       summary: Register a new user
       tags:
       - auth
@@ -304,14 +288,41 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/user.User'
-            type: array
-        "503":
-          description: Service Unavailable
-          schema:
-            $ref: '#/definitions/response.HTTPError'
+            allOf:
+            - $ref: '#/definitions/response.HTTP'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/user.User'
+                  type: array
+              type: object
       summary: Get all users
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update user by ID
+      parameters:
+      - description: Update user
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTP'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.User'
+              type: object
+      summary: Update user by ID
       tags:
       - users
   /v1/users/{id}:
@@ -331,11 +342,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.HTTPError'
-        "503":
-          description: Service Unavailable
-          schema:
-            $ref: '#/definitions/response.HTTPError'
+            $ref: '#/definitions/response.HTTP'
       summary: Remove user by ID
       tags:
       - users

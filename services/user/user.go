@@ -27,8 +27,7 @@ type User struct {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.HTTP
-// @Failure 200 {object} response.HTTP
+// @Success 200 {object} response.HTTP{data=[]User}
 // @Router /v1/users [get]
 func GetAll(c *fiber.Ctx) error {
 	db := database.DBConn
@@ -56,8 +55,7 @@ func GetAll(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param user body UpdateUser true "Update user"
-// @Success 200 {object} response.HTTP
-// @Failure 200 {object} response.HTTP
+// @Success 200 {object} response.HTTP{data=User}
 // @Router /v1/users [put]
 func Update(c *fiber.Ctx) error {
 	id := c.Params("id")
@@ -101,7 +99,6 @@ func Update(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "User ID"
 // @Success 200 {object} response.HTTP
-// @Failure 200 {object} response.HTTP
 // @Router /v1/users/{id} [delete]
 func Delete(c *fiber.Ctx) error {
 	id := c.Params("id")

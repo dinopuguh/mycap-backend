@@ -35,8 +35,7 @@ const (
 // @Tags groups
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.HTTP
-// @Failure 200 {object} response.HTTP
+// @Success 200 {object} response.HTTP{data=[]Group}
 // @Router /v1/groups [get]
 func GetAll(c *fiber.Ctx) error {
 	db := database.DBConn
@@ -64,9 +63,7 @@ func GetAll(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param group body CreateGroup true "Create group"
-// @Success 200 {object} response.HTTP
-// @Failure 200 {object} response.HTTP
-// @Failure 401 {object} string
+// @Success 200 {object} response.HTTP{data=Group}
 // @Security ApiKeyAuth
 // @Router /v1/groups [post]
 func New(c *fiber.Ctx) error {
@@ -142,9 +139,7 @@ func New(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param group body JoinGroup true "Join group"
-// @Success 200 {object} response.HTTP
-// @Failure 200 {object} response.HTTP
-// @Failure 401 {object} string
+// @Success 200 {object} response.HTTP{data=Group}
 // @Security ApiKeyAuth
 // @Router /v1/join-groups [post]
 func Join(c *fiber.Ctx) error {
@@ -194,9 +189,7 @@ func Join(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param group body LeaveGroup true "Leave group"
-// @Success 200 {object} response.HTTP
-// @Failure 200 {object} response.HTTP
-// @Failure 401 {object} string
+// @Success 200 {object} response.HTTP{data=Group}
 // @Security ApiKeyAuth
 // @Router /v1/leave-groups [post]
 func Leave(c *fiber.Ctx) error {

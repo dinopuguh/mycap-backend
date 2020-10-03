@@ -23,8 +23,7 @@ type ResponseAuth struct {
 // @Accept json
 // @Produce json
 // @Param user body RegisterUser true "Register user"
-// @Success 200 {object} response.HTTP
-// @Failure 200 {object} response.HTTP
+// @Success 200 {object} response.HTTP{data=ResponseAuth}
 // @Router /v1/register [post]
 func New(c *fiber.Ctx) error {
 	db := database.DBConn
@@ -94,8 +93,7 @@ func New(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param user body LoginUser true "User login"
-// @Success 200 {object} response.HTTP
-// @Failure 200 {object} response.HTTP
+// @Success 200 {object} response.HTTP{data=ResponseAuth}
 // @Router /v1/login [post]
 func Login(c *fiber.Ctx) error {
 	db := database.DBConn
