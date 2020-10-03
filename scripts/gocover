@@ -4,7 +4,6 @@
 # Coverage test
 
 set -e
-go test
 go test ./services/user/... -covermode=count -coverprofile=cover.out
 go test ./services/user/... -json > test-report.out
 go test ./services/user/... -coverprofile=coverage.out
