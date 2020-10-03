@@ -1,5 +1,36 @@
 basePath: /api
 definitions:
+  group.CreateGroup:
+    properties:
+      type:
+        type: string
+    type: object
+  group.Group:
+    properties:
+      admin:
+        $ref: '#/definitions/user.User'
+        type: object
+      admin_id:
+        type: integer
+      admin_username:
+        type: string
+      participants:
+        items:
+          $ref: '#/definitions/user.User'
+        type: array
+      type:
+        type: string
+    type: object
+  group.JoinGroup:
+    properties:
+      admin_username:
+        type: string
+    type: object
+  group.LeaveGroup:
+    properties:
+      admin_username:
+        type: string
+    type: object
   response.HTTPError:
     properties:
       message:
@@ -66,6 +97,134 @@ info:
   title: MyCap API
   version: "1.0"
 paths:
+  /v1/groups:
+    get:
+      consumes:
+      - application/json
+      description: Get all groups
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/group.Group'
+            type: array
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      summary: Get all groups
+      tags:
+      - groups
+    post:
+      consumes:
+      - application/json
+      description: Create a group chat or conference
+      parameters:
+      - description: Create group
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/group.CreateGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.Group'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a group chat or conference
+      tags:
+      - groups
+  /v1/join-groups:
+    post:
+      consumes:
+      - application/json
+      description: Joining group chat or conference
+      parameters:
+      - description: Join group
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/group.JoinGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.Group'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Joining group chat or conference
+      tags:
+      - groups
+  /v1/leave-groups:
+    post:
+      consumes:
+      - application/json
+      description: Leaving group chat or conference
+      parameters:
+      - description: Leave group
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/group.LeaveGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.Group'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/response.HTTPError'
+      security:
+      - ApiKeyAuth: []
+      summary: Leaving group chat or conference
+      tags:
+      - groups
   /v1/login:
     post:
       consumes:
@@ -154,7 +313,7 @@ paths:
             $ref: '#/definitions/response.HTTPError'
       summary: Get all users
       tags:
-      - user
+      - users
   /v1/users/{id}:
     delete:
       consumes:
@@ -179,7 +338,7 @@ paths:
             $ref: '#/definitions/response.HTTPError'
       summary: Remove user by ID
       tags:
-      - user
+      - users
 securityDefinitions:
   ApiKeyAuth:
     in: header

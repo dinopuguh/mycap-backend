@@ -1,0 +1,327 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/dinopuguh/mycap-backend/services/group/group.go (96.9%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package group
+
+import (
+        "net/http"
+
+        "gorm.io/gorm"
+
+        "github.com/dgrijalva/jwt-go"
+        "github.com/dinopuguh/mycap-backend/database"
+        "github.com/dinopuguh/mycap-backend/response"
+        "github.com/dinopuguh/mycap-backend/services/user"
+        "github.com/gofiber/fiber/v2"
+)
+
+// Group is a model for group chat
+type Group struct {
+        gorm.Model
+        AdminID       uint        `json:"admin_id"`
+        AdminUsername string      `json:"admin_username"`
+        Admin         user.User   `json:"admin"`
+        Type          string      `json:"type"`
+        Participants  []user.User `json:"participants" gorm:"many2many:group_participants;"`
+}
+
+const (
+        // GroupType is an enum for group chat
+        GroupType = "Group"
+        // ConferenceType is an enum for conference
+        ConferenceType = "Conference"
+)
+
+// GetAll is a function to get all groups from database
+// @Summary Get all groups
+// @Description Get all groups
+// @Tags groups
+// @Accept json
+// @Produce json
+// @Success 200 {object} []Group
+// @Failure 503 {object} response.HTTPError
+// @Router /v1/groups [get]
+func GetAll(c *fiber.Ctx) error <span class="cov8" title="1">{
+        db := database.DBConn
+
+        var groups []Group
+        if res := db.Preload("Admin").Preload("Participants").Find(&amp;groups); res.Error != nil </span><span class="cov0" title="0">{
+                return c.Status(http.StatusServiceUnavailable).JSON(response.HTTPError{
+                        Status:  http.StatusServiceUnavailable,
+                        Message: res.Error.Error(),
+                })
+        }</span>
+
+        <span class="cov8" title="1">return c.JSON(groups)</span>
+}
+
+// New function creates a group/conference for communicate with deaf people
+// @Summary Create a group chat or conference
+// @Description Create a group chat or conference
+// @Tags groups
+// @Accept json
+// @Produce json
+// @Param group body CreateGroup true "Create group"
+// @Success 200 {object} Group
+// @Failure 400 {object} response.HTTPError
+// @Failure 401 {object} string
+// @Failure 503 {object} response.HTTPError
+// @Security ApiKeyAuth
+// @Router /v1/groups [post]
+func New(c *fiber.Ctx) error <span class="cov8" title="1">{
+        db := database.DBConn
+
+        token := c.Locals("user").(*jwt.Token)
+        claims := token.Claims.(jwt.MapClaims)
+        email := claims["email"].(string)
+
+        var admin = new(user.User)
+        db.Where("email = ?", email).First(&amp;admin)
+
+        var existingGroup = new(Group)
+        if res := db.Where("admin_id = ?", admin.ID).First(&amp;existingGroup); res.RowsAffected != 0 </span><span class="cov8" title="1">{
+                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                        Status:  http.StatusBadRequest,
+                        Message: "You are already has a group chat or conference.",
+                })
+        }</span>
+
+        <span class="cov8" title="1">if admin.ReachedTimeLimit </span><span class="cov8" title="1">{
+                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                        Status:  http.StatusBadRequest,
+                        Message: "This user already reached time limit this month.",
+                })
+        }</span>
+
+        <span class="cov8" title="1">var group = new(Group)
+
+        participants := make([]user.User, 0)
+        participants = append(participants, *admin)
+
+        createGroup := new(CreateGroup)
+        if err := c.BodyParser(&amp;createGroup); err != nil </span><span class="cov8" title="1">{
+                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                        Status:  http.StatusBadRequest,
+                        Message: err.Error(),
+                })
+        }</span>
+
+        <span class="cov8" title="1">group.Admin = *admin
+        group.AdminUsername = admin.Username
+        group.Participants = participants
+
+        if createGroup.Type != GroupType &amp;&amp; createGroup.Type != ConferenceType </span><span class="cov8" title="1">{
+                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                        Status:  http.StatusBadRequest,
+                        Message: "Group type not specified.",
+                })
+        }</span>
+
+        <span class="cov8" title="1">group.Type = createGroup.Type
+
+        if res := db.Create(group); res.Error != nil </span><span class="cov0" title="0">{
+                return c.Status(http.StatusServiceUnavailable).JSON(response.HTTPError{
+                        Status:  http.StatusServiceUnavailable,
+                        Message: res.Error.Error(),
+                })
+        }</span>
+
+        <span class="cov8" title="1">return c.JSON(group)</span>
+}
+
+// Join function assign an user to specific group
+// @Summary Joining group chat or conference
+// @Description Joining group chat or conference
+// @Tags groups
+// @Accept json
+// @Produce json
+// @Param group body JoinGroup true "Join group"
+// @Success 200 {object} Group
+// @Failure 400 {object} response.HTTPError
+// @Failure 404 {object} response.HTTPError
+// @Failure 503 {object} response.HTTPError
+// @Security ApiKeyAuth
+// @Router /v1/join-groups [post]
+func Join(c *fiber.Ctx) error <span class="cov8" title="1">{
+        db := database.DBConn
+
+        token := c.Locals("user").(*jwt.Token)
+        claims := token.Claims.(jwt.MapClaims)
+        email := claims["email"].(string)
+
+        var joiningUser = new(user.User)
+        db.Where("email = ?", email).First(&amp;joiningUser)
+
+        joinGroup := new(JoinGroup)
+        if err := c.BodyParser(&amp;joinGroup); err != nil </span><span class="cov8" title="1">{
+                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                        Status:  http.StatusBadRequest,
+                        Message: err.Error(),
+                })
+        }</span>
+
+        <span class="cov8" title="1">var group = new(Group)
+        if res := db.Where("admin_username = ?", joinGroup.AdminUsername).First(&amp;group); res.RowsAffected == 0 </span><span class="cov8" title="1">{
+                return c.Status(http.StatusNotFound).JSON(response.HTTPError{
+                        Status:  http.StatusNotFound,
+                        Message: "Group not found.",
+                })
+        }</span>
+
+        <span class="cov8" title="1">group.Participants = append(group.Participants, *joiningUser)
+
+        db.Save(&amp;group)
+
+        db.Preload("Admin").Preload("Participants").First(&amp;group, group.ID)
+
+        return c.JSON(group)</span>
+}
+
+// Leave function remove an user from specific group
+// @Summary Leaving group chat or conference
+// @Description Leaving group chat or conference
+// @Tags groups
+// @Accept json
+// @Produce json
+// @Param group body LeaveGroup true "Leave group"
+// @Success 200 {object} Group
+// @Failure 400 {object} response.HTTPError
+// @Failure 404 {object} response.HTTPError
+// @Failure 503 {object} response.HTTPError
+// @Security ApiKeyAuth
+// @Router /v1/leave-groups [post]
+func Leave(c *fiber.Ctx) error <span class="cov8" title="1">{
+        db := database.DBConn
+
+        token := c.Locals("user").(*jwt.Token)
+        claims := token.Claims.(jwt.MapClaims)
+        email := claims["email"].(string)
+
+        var leavingUser = new(user.User)
+        db.Where("email = ?", email).First(&amp;leavingUser)
+
+        leaveGroup := new(LeaveGroup)
+        if err := c.BodyParser(&amp;leaveGroup); err != nil </span><span class="cov8" title="1">{
+                return c.Status(http.StatusBadRequest).JSON(response.HTTPError{
+                        Status:  http.StatusBadRequest,
+                        Message: err.Error(),
+                })
+        }</span>
+
+        <span class="cov8" title="1">var group = new(Group)
+        if res := db.Preload("Admin").Where("admin_username = ?", leaveGroup.AdminUsername).First(&amp;group); res.RowsAffected == 0 </span><span class="cov8" title="1">{
+                return c.Status(http.StatusNotFound).JSON(response.HTTPError{
+                        Status:  http.StatusNotFound,
+                        Message: "Group not found.",
+                })
+        }</span>
+
+        <span class="cov8" title="1">if group.AdminID == leavingUser.ID </span><span class="cov8" title="1">{
+                db.Model(&amp;group).Association("Participants").Clear()
+                db.Delete(&amp;group)
+        }</span> else<span class="cov8" title="1"> {
+                db.Model(&amp;group).Association("Participants").Delete(leavingUser)
+                db.Preload("Admin").Preload("Participants").First(&amp;group, group.ID)
+        }</span>
+
+        <span class="cov8" title="1">return c.JSON(group)</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

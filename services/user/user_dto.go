@@ -13,3 +13,10 @@ type RegisterUser struct {
 	Email    string `json:"email" example:"dinopuguh@mycap.com"`
 	Password string `json:"password" example:"s3cr3tp45sw0rd"`
 }
+
+// UpdateUser is a data transfer object for update user
+type UpdateUser struct {
+	Name             string `json:"name" example:"Dino Puguh"`
+	RemainingTime    int64  `json:"remaining_time" example:"1800"`
+	ReachedTimeLimit bool   `json:"reached_time_limit" example:"false"`
+}

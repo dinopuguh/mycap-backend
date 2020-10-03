@@ -1,7 +1,9 @@
 package response
 
-// HTTPError represents response body if there is an error
-type HTTPError struct {
-	Status  int    `json:"status"`
-	Message string `json:"message"`
+// HTTP represents response body
+type HTTP struct {
+	Success bool        `json:"success"`
+	Data    interface{} `json:"data"`
+	Status  int         `json:"status"`
+	Message string      `json:"message"`
 }

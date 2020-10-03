@@ -24,59 +24,107 @@ type User struct {
 // GetAll is a function to get all users data from database
 // @Summary Get all users
 // @Description Get all users
-// @Tags user
+// @Tags users
 // @Accept json
 // @Produce json
-// @Success 200 {object} []User
-// @Failure 503 {object} response.HTTPError
+// @Success 200 {object} response.HTTP
+// @Failure 200 {object} response.HTTP
 // @Router /v1/users [get]
 func GetAll(c *fiber.Ctx) error {
 	db := database.DBConn
 
 	var users []User
 	if res := db.Find(&users); res.Error != nil {
-		return c.Status(http.StatusServiceUnavailable).JSON(response.HTTPError{
+		return c.JSON(response.HTTP{
 			Status:  http.StatusServiceUnavailable,
 			Message: res.Error.Error(),
 		})
 	}
 
-	return c.JSON(users)
+	return c.JSON(response.HTTP{
+		Success: true,
+		Data:    users,
+		Status:  http.StatusOK,
+		Message: "Success get all users.",
+	})
 }
 
-// Delete function removes a user by ID
+// Update function edit an user by ID
+// @Summary Update user by ID
+// @Description Update user by ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body UpdateUser true "Update user"
+// @Success 200 {object} response.HTTP
+// @Failure 200 {object} response.HTTP
+// @Router /v1/users [put]
+func Update(c *fiber.Ctx) error {
+	id := c.Params("id")
+	db := database.DBConn
+
+	var user User
+	if res := db.First(&user, id); res.RowsAffected == 0 {
+		return c.JSON(response.HTTP{
+			Status:  http.StatusNotFound,
+			Message: fmt.Sprintf("User with ID %v not found.", id),
+		})
+	}
+
+	updatedUser := new(UpdateUser)
+	if err := c.BodyParser(&updatedUser); err != nil {
+		return c.JSON(response.HTTP{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
+		})
+	}
+
+	user.Name = updatedUser.Name
+	user.RemainingTime = updatedUser.RemainingTime
+	user.ReachedTimeLimit = updatedUser.ReachedTimeLimit
+
+	db.Save(&user)
+
+	return c.JSON(response.HTTP{
+		Success: true,
+		Data:    user,
+		Status:  http.StatusOK,
+		Message: "Success update user.",
+	})
+}
+
+// Delete function removes an user by ID
 // @Summary Remove user by ID
 // @Description Remove user by ID
-// @Tags user
+// @Tags users
 // @Accept json
 // @Produce json
 // @Param id path int true "User ID"
-// @Success 200 {object} response.HTTPError
-// @Failure 503 {object} response.HTTPError
+// @Success 200 {object} response.HTTP
+// @Failure 200 {object} response.HTTP
 // @Router /v1/users/{id} [delete]
 func Delete(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
 
 	var user User
-	res := db.First(&user, id)
-
-	if res.RowsAffected == 0 {
-		return c.Status(http.StatusNotFound).JSON(response.HTTPError{
+	if res := db.First(&user, id); res.RowsAffected == 0 {
+		return c.JSON(response.HTTP{
 			Status:  http.StatusNotFound,
 			Message: fmt.Sprintf("User with ID %v not found.", id),
 		})
 	}
 
-	if res = db.Delete(&user); res.Error != nil {
-		return c.Status(http.StatusServiceUnavailable).JSON(response.HTTPError{
+	if res := db.Delete(&user); res.Error != nil {
+		return c.JSON(response.HTTP{
 			Status:  http.StatusServiceUnavailable,
 			Message: res.Error.Error(),
 		})
 	}
 
-	return c.JSON(response.HTTPError{
+	return c.JSON(response.HTTP{
+		Success: true,
 		Status:  http.StatusOK,
-		Message: "User deleted.",
+		Message: "Success delete user.",
 	})
 }
