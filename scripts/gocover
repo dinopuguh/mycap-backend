@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Usage: scripts/gocover
+#
+# Coverage test
+
+set -e
+go test
+go test ./services/user/... -covermode=count -coverprofile=cover.out
+go test ./services/user/... -json > test-report.out
+go test ./services/user/... -coverprofile=coverage.out
+
+go test ./services/group/... -covermode=count -coverprofile=cover.out
+go test ./services/group/... -json > test-report.out
+go test ./services/group/... -coverprofile=coverage.out
+
+go tool cover -func=cover.out
+$GOPATH/bin/goveralls -coverprofile=cover.out -service=travis-ci

@@ -1,0 +1,17 @@
+language: go
+go:
+  - "1.14.7"
+services:
+  - postgresql
+env:
+  global:
+    - MYCAP_DB_USER=postgres
+    - MYCAP_DB_PASSWORD=postgres
+    - MYCAP_DB_HOST=localhost
+    - MYCAP_DB_NAME=mycap
+    - MYCAP_DB_PORT=5432
+before_script:
+  - psql -c 'create database mycap;' -U postgres
+script:
+  - scripts/cibuild
+sudo: false
