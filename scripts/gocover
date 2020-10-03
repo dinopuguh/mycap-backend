@@ -8,4 +8,4 @@ go test ./services/user/... -v -covermode=count -coverprofile=./services/user/co
 go test ./services/group/... -v -covermode=count -coverprofile=./services/group/coverage.out
 
 $GOPATH/bin/goveralls -coverprofile=./services/user/coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
-$GOPATH/bin/goveralls -coverprofile=./services/group/coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
+# $GOPATH/bin/goveralls -coverprofile=./services/group/coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
