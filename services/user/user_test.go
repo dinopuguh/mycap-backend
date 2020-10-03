@@ -104,18 +104,18 @@ func TestNew(t *testing.T) {
 			req, _ := http.NewRequest(http.MethodPost, "/api/v1/register", bytes.NewBuffer(reqBody))
 			req.Header.Set("Content-Type", tt.args.contentType)
 
-			resHttp := new(response.HTTP)
+			resHTTP := new(response.HTTP)
 			res, _ := app.Test(req, -1)
 			defer res.Body.Close()
 			resBody, _ := ioutil.ReadAll(res.Body)
-			json.Unmarshal(resBody, &resHttp)
+			json.Unmarshal(resBody, &resHTTP)
 
-			assert.Equalf(t, tt.args.statusCode, resHttp.Status, string(resBody))
+			assert.Equalf(t, tt.args.statusCode, resHTTP.Status, string(resBody))
 
 			if tt.args.statusCode == http.StatusOK {
 				auth := new(user.ResponseAuth)
-				authJson, _ := json.Marshal(resHttp.Data)
-				json.Unmarshal(authJson, &auth)
+				authJSON, _ := json.Marshal(resHTTP.Data)
+				json.Unmarshal(authJSON, &auth)
 
 				if tt.args.willUpdate {
 					updatedUser = &auth.User
@@ -193,14 +193,14 @@ func TestUpdate(t *testing.T) {
 			reqLogin, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(loginBody))
 			reqLogin.Header.Set("Content-Type", "application/json")
 
-			resHttp := new(response.HTTP)
+			resHTTP := new(response.HTTP)
 			login := new(user.ResponseAuth)
 			resLogin, _ := app.Test(reqLogin, -1)
 			defer resLogin.Body.Close()
 			resBodyLogin, _ := ioutil.ReadAll(resLogin.Body)
-			json.Unmarshal(resBodyLogin, &resHttp)
-			loginJson, _ := json.Marshal(resHttp.Data)
-			json.Unmarshal(loginJson, &login)
+			json.Unmarshal(resBodyLogin, &resHTTP)
+			loginJSON, _ := json.Marshal(resHTTP.Data)
+			json.Unmarshal(loginJSON, &login)
 
 			reqBody, _ := json.Marshal(tt.args.data)
 			endpoint := fmt.Sprintf("/api/v1/users/%d", tt.args.userID)
@@ -211,9 +211,9 @@ func TestUpdate(t *testing.T) {
 			res, _ := app.Test(req, -1)
 			defer res.Body.Close()
 			resBody, _ := ioutil.ReadAll(res.Body)
-			json.Unmarshal(resBody, &resHttp)
+			json.Unmarshal(resBody, &resHTTP)
 
-			assert.Equalf(t, tt.args.statusCode, resHttp.Status, string(resBody))
+			assert.Equalf(t, tt.args.statusCode, resHTTP.Status, string(resBody))
 		})
 	}
 }
@@ -228,13 +228,13 @@ func TestGetAll(t *testing.T) {
 	t.Run("Get all users", func(t *testing.T) {
 		req, _ := http.NewRequest(http.MethodGet, "/api/v1/users", nil)
 
-		resHttp := new(response.HTTP)
+		resHTTP := new(response.HTTP)
 		res, _ := app.Test(req, -1)
 		defer res.Body.Close()
 		resBody, _ := ioutil.ReadAll(res.Body)
-		json.Unmarshal(resBody, &resHttp)
+		json.Unmarshal(resBody, &resHTTP)
 
-		assert.Equalf(t, http.StatusOK, resHttp.Status, string(resBody))
+		assert.Equalf(t, http.StatusOK, resHTTP.Status, string(resBody))
 	})
 }
 
@@ -292,12 +292,12 @@ func TestLogin(t *testing.T) {
 			req, _ := http.NewRequest(http.MethodPost, "/api/v1/login", bytes.NewBuffer(reqBody))
 			req.Header.Set("Content-Type", tt.args.contentType)
 
-			resHttp := new(response.HTTP)
+			resHTTP := new(response.HTTP)
 			res, _ := app.Test(req, -1)
 			resBody, _ := ioutil.ReadAll(res.Body)
-			json.Unmarshal(resBody, &resHttp)
+			json.Unmarshal(resBody, &resHTTP)
 
-			assert.Equalf(t, tt.args.statusCode, resHttp.Status, string(resBody))
+			assert.Equalf(t, tt.args.statusCode, resHTTP.Status, string(resBody))
 		})
 	}
 }
@@ -331,12 +331,12 @@ func TestDelete(t *testing.T) {
 			endpoint := fmt.Sprintf("/api/v1/users/%d", tt.args.userID)
 			req, _ := http.NewRequest(http.MethodDelete, endpoint, nil)
 
-			resHttp := new(response.HTTP)
+			resHTTP := new(response.HTTP)
 			res, _ := app.Test(req, -1)
 			resBody, _ := ioutil.ReadAll(res.Body)
-			json.Unmarshal(resBody, &resHttp)
+			json.Unmarshal(resBody, &resHTTP)
 
-			assert.Equalf(t, tt.args.statusCode, resHttp.Status, string(resBody))
+			assert.Equalf(t, tt.args.statusCode, resHTTP.Status, string(resBody))
 		})
 	}
 }
