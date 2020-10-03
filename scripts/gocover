@@ -4,8 +4,21 @@
 # Coverage test
 
 set -e
-go test ./services/user/... -v -covermode=count -coverprofile=./services/user/coverage.out
-go test ./services/group/... -v -covermode=count -coverprofile=./services/group/coverage.out
 
-$GOPATH/bin/goveralls -coverprofile=./services/user/coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
-# $GOPATH/bin/goveralls -coverprofile=./services/group/coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
+echo "mode: count" > coverage.out
+for Dir in $(find ./* -maxdepth 10 -type d);
+do
+    if ls $Dir/*.go &> /dev/null;
+    then
+        go test -v -coverprofile=profile.out $Dir
+        if [ -f profile.out ]
+        then
+            cat profile.out | grep -v "mode: count" >> coverage.out
+        fi
+    fi
+done
+
+$GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
+
+rm -rf ./coverage.out
+rm -rf ./profile.out
