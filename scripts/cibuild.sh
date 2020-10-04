@@ -4,6 +4,6 @@
 # Run tests
 
 set -e
-scripts/goget
-scripts/gomigrate
-scripts/gocover
+scripts/goget.sh
+scripts/gomigrate.sh
+scripts/gocover.sh

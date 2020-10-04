@@ -40,8 +40,8 @@ func main() {
 		migrations.All()
 	}
 
-	host := os.Getenv("MYCAP_HOSTNAME")
+	port := os.Getenv("MYCAP_PORT")
 
 	app := routes.New()
-	log.Fatal(app.Listen(host))
+	log.Fatal(app.Listen(":" + port))
 }
