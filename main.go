@@ -21,7 +21,6 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:3000
 // @BasePath /api
 
 // @securityDefinitions.apikey ApiKeyAuth
@@ -40,8 +39,8 @@ func main() {
 		migrations.All()
 	}
 
-	host := os.Getenv("MYCAP_HOSTNAME")
+	port := os.Getenv("PORT")
 
 	app := routes.New()
-	log.Fatal(app.Listen(host))
+	log.Fatal(app.Listen(":" + port))
 }
