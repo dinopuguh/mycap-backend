@@ -17,8 +17,16 @@ type User struct {
 	Username         string `json:"username"`
 	Email            string `json:"email"`
 	Password         string `json:"password"`
-	RemainingTime    int64  `json:"remaining_time" gorm:"default:18000;"`
+	RemainingTime    int64  `json:"remaining_time" gorm:"default:36000000;"`
 	ReachedTimeLimit bool   `json:"reached_time_limit" gorm:"default:false;"`
+	Type             Type   `json:"type"`
+	TypeID           uint   `json:"type_id"`
+}
+
+// Type is a model for user's type
+type Type struct {
+	gorm.Model
+	Name string `json:"name"`
 }
 
 // GetAll is a function to get all users data from database
@@ -54,9 +62,10 @@ func GetAll(c *fiber.Ctx) error {
 // @Tags users
 // @Accept json
 // @Produce json
+// @Param id path int true "User ID"
 // @Param user body UpdateUser true "Update user"
 // @Success 200 {object} response.HTTP{data=User}
-// @Router /v1/users [put]
+// @Router /v1/users/{id} [put]
 func Update(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
@@ -124,4 +133,11 @@ func Delete(c *fiber.Ctx) error {
 		Status:  http.StatusOK,
 		Message: "Success delete user.",
 	})
+}
+
+// ResetTimeLimit function updates users' time limit monthly
+func ResetTimeLimit() {
+	db := database.DBConn
+
+	db.Model(User{}).Where("type_id = ?", 1).Updates(User{ReachedTimeLimit: false, RemainingTime: 36000000})
 }
