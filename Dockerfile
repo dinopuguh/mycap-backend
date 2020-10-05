@@ -12,7 +12,7 @@ ENV GO111MODULE=on \
 RUN go build -o main .
 RUN go build -o migrate ./cmd
 
-FROM alpine:latest
+FROM alpine:20200917
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 COPY --from=builder /app/main .

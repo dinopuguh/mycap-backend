@@ -103,7 +103,6 @@ definitions:
       username:
         type: string
     type: object
-host: localhost:3000
 info:
   contact:
     email: dinopuguh@gmail.com
@@ -113,7 +112,6 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: MyCap API
-  version: "1.0"
 paths:
   /v1/groups:
     get:

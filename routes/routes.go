@@ -20,7 +20,11 @@ func New() *fiber.App {
 		TimeFormat: "02-Jan-2006",
 		TimeZone:   "Asia/Jakarta",
 	}))
-	app.Use("/swagger", swagger.Handler)
+	app.Use("/docs", swagger.Handler)
+	
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.JSON("Welcome to MyCap API 🤟")
+	})
 
 	api := app.Group("/api")
 	v1 := api.Group("/v1", func(c *fiber.Ctx) error {

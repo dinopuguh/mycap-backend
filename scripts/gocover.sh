@@ -8,12 +8,12 @@ set -e
 echo "mode: count" > coverage.out
 
 go test -v -covermode=count -coverprofile=profile.out ./services/user/...
-cat profile.out | grep -v "mode: count" >> coverage.out
+grep -v "mode: count" >> coverage.out profile.out
 
 go test -v -covermode=count -coverprofile=profile.out ./services/group/...
-cat profile.out | grep -v "mode: count" >> coverage.out
+grep -v "mode: count" >> coverage.out profile.out
 
-$GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN
+echo "$GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN"
 
 rm -rf ./coverage.out
 rm -rf ./profile.out
