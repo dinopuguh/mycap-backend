@@ -3,27 +3,24 @@ go:
   - 1.14.7
 services:
   - docker
+  - postgresql
 env:
   global:
-    - DOCKER_COMPOSE_VERSION=1.27.4
     - DOCKER_USER=dinopuguh
-    - DB_USER=postgres
-    - DB_PASSWORD=postgres
-    - DB_NAME=mycap
-    - DB_PORT=5432
+    - MYCAP_DB_USER=postgres
+    - MYCAP_DB_PASSWORD=postgres
+    - MYCAP_DB_HOST=postgres_db
+    - MYCAP_DB_NAME=mycap
+    - MYCAP_DB_PORT=5432
+    - MYCAP_JWT_TOKEN=v3rys3cr3tt0k3n
     - secure: ggKqLcD5pRzOhkQKTx+Oeb8jFK6TlNgYJpNdEY8CA9O6H7EWyJ50hPJxVqz2rLjNQrIiVf0+XPA2+17cWizFPi9qdWcIXj6rJkbMYYLWChEXVki7crsstAssvdX+rfHgwAPSFJ4gIr6LFxh/9KUEv13V11ZReEg40K2UIRJd+WhQxXoaU3xJNEjbiLpTPDyxK3zLdbPLFBfuzC3HOONFubFr5LDy8uRVPMwEL9KzTWReSN+YDLY/BoVSWAS8z2hW4FvLoYU1irHFcvvEg1c/ysbwwrHf4/A/nDouK2DQU294h2bsX7Q9CCRS3HgcW+KaZaOsS1SI4Y48CT1uCPElLKG/zYJLDCeTEcu4B9yk+YSzpx+D+bY4sxV51Z/1j86a/j7Er4Atv8gfC0Uh5NnoOigno0RGqSUx4KuRoXl1yO2wR6ix2fqjDYa5ZFz55p/Lrx3xIVghRf3s+trelZRp+qvyiCFljURvtCkTZiGEeFVQQjDxdLp8dUkf7EKUX3PlUfNBddWqjg0hfRUSnI5y3OhxUUQKjXM1cUY4wXJQJoMwrN3+ePJsGdRNkFiSusskPufhE/vWpGOpbM4eewnsVTcMwSKMNQVx81O1W0JsieOnrRm0B+4ln7nuecwoO/owhYTkoWpKLAWX1na69STuLx+oUS5y8q8bL2Tn5VjEVVA=
     - secure: BNdiUkPhkto14CdG3Tjr0JoJv7IQNtdk68DCgAgSHnbqVzOW5lAlbG9hz3J/GkGvONzfzQHanLxpIPQhQhd0ETv6WDaOE5UwoHg6xoSHPF4m+Ifw3cUp+ksS0R7x9J+1Zd5iIk35aEClsqE/x1tFHkW+bq75ljRERt0mCX+nP0GWN96SZDgmOVBs8sN1xCUgpzDN3oUGDo4icsdZAKXTW8MgEQCmYzwd3Xds8IUMKpshf39shJLKV1EfNcNRCntlmJoWn2Et52OdMvYbgAd/xsPi4HxRlhOnxEAFS6J6BnP1y1/mLouRUHa8iFg6iu+jWJA6rxgh1GM+rDcVjChzPa8lcEbHymkf1WDqb4KEeCItEd9MhDl2JDL4eWaNws0B5n71AuRpRgUZdwFDsnKrmZpUJRvImLgozbBWZAv+MiGzNcqkS9r5mhRIfIGW+RNYTh8lN1GFO8QT9f8P4Q9aHeuscgUYJIi/LoSnrpC5N8fMNJtQgKsBTUzUQwK+/yGPneWrNTDghRVnC43IKLb+0RQCNjj//z0hjEbvRll9IpnVUeStHUBJVAW6E34Tv1MjLcW7+VQ3OAJK5w4I2wdbDGkRjhdkf9qYYX2O+YikwKsJug+OZizVppRWsQuxGPcLeiBLzmf4YzGIvfSCCXeHYJwV802iZJqxn+FIOKJPLsI=
     - secure: CX2T2/VT4mXLs4w+ev8A0PSPUeynPCfY9YcuEkQ2db9bkhwDscYLI4VT+PEu/c7Uxs+edL2zarsow8O5/tEv6BterrFI+JfjRKWOOviTu/BOxEkyjBcnabskIHIsLahgWpZ11b2wQJPUe5W9h3MQMh+9GEHbEX93/h/ZBmE6sN/a6SvTLjTkLKJbdDMVvpqtBwqoEtEbQMNqkPYZTxfT1d0G8xfpXSXkl1dakQsqS1c2QSrVO9qs4h58W1crI7d+1LGqc/WhqrZ7dqlHDxoUQ+7BNk0jhUXc85ErZQ8jEUt7ljxSbd1q6bdzqL0a9erfcvf4i2cupCqtCp4G9dmlJ2QkZqZpRSb/VDDG086HuhEK1+KrR5HQNNrCGRq2s8SiJopMfDzJI2dbh1zaJc+fXwH00z/jouPugBiqNxp0/pKAug8fWHFswm5uXReaYHlN6uvxHA4jTBa1saK/7pblopli0XNZ1zw3VRenvBTsuus15cc5xmFJ7lXEOgMS1PGoJ5jmoMFiIFqkU1M3vplp546033WDxXcSmeN65nesJVLzb9bwBMhVrL0ZSyoWv8QCEnL6vJmDXKnp4dWoPjuZbfJ3NcT+YJeOTQZ/M+p7RMhRjLBmFJG8XzWITd9z5+uLPDs+vV6+RY7Q3mmDCja+CZguEqMilUIZMMA24vwg9hQ=
-before_install:
-  - sudo rm /usr/local/bin/docker-compose
-  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname
-    -s`-`uname -m` > docker-compose
-  - chmod +x docker-compose
-  - sudo mv docker-compose /usr/local/bin
 before_script:
-  - docker-compose up -d --build
+  - psql -c 'create database mycap;' -U postgres
 script:
   - scripts/cibuild.sh
+  - docker build -t mycap-backend .
 after_success:
   - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
   - docker tag mycap-backend $DOCKER_USER/mycap-backend:$TRAVIS_BUILD_NUMBER
@@ -34,8 +31,6 @@ after_success:
   - heroku container:login
   - heroku container:push web -a mycap-staging
   - heroku container:release web -a mycap-staging
-after_script:
-  - docker-compose down
 # deploy:
 #   provider: heroku
 #   api_key:
