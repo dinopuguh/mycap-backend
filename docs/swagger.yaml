@@ -64,6 +64,10 @@ definitions:
       password:
         example: s3cr3tp45sw0rd
         type: string
+      type_id:
+        description: '(1: Free, 2: Premium, 3: Pro)'
+        example: 1
+        type: integer
       username:
         example: dinopuguh
         type: string
@@ -76,16 +80,19 @@ definitions:
         $ref: '#/definitions/user.User'
         type: object
     type: object
+  user.Type:
+    properties:
+      name:
+        type: string
+    type: object
   user.UpdateUser:
     properties:
       name:
         example: Dino Puguh
         type: string
-      reached_time_limit:
-        example: false
-        type: boolean
-      remaining_time:
-        example: 1800
+      type_id:
+        description: '(1: Free, 2: Premium, 3: Pro)'
+        example: 2
         type: integer
     type: object
   user.User:
@@ -100,6 +107,11 @@ definitions:
         type: boolean
       remaining_time:
         type: integer
+      type:
+        $ref: '#/definitions/user.Type'
+        type: object
+      type_id:
+        type: integer
       username:
         type: string
     type: object
@@ -112,6 +124,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: MyCap API
+  version: "1.0"
 paths:
   /v1/groups:
     get:
@@ -297,32 +310,6 @@ paths:
       summary: Get all users
       tags:
       - users
-    put:
-      consumes:
-      - application/json
-      description: Update user by ID
-      parameters:
-      - description: Update user
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/user.UpdateUser'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.HTTP'
-            - properties:
-                data:
-                  $ref: '#/definitions/user.User'
-              type: object
-      summary: Update user by ID
-      tags:
-      - users
   /v1/users/{id}:
     delete:
       consumes:
@@ -341,7 +328,42 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.HTTP'
+      security:
+      - ApiKeyAuth: []
       summary: Remove user by ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update user
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTP'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.User'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update user by ID
       tags:
       - users
 securityDefinitions:

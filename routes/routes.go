@@ -21,7 +21,7 @@ func New() *fiber.App {
 		TimeZone:   "Asia/Jakarta",
 	}))
 	app.Use("/docs", swagger.Handler)
-	
+
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON("Welcome to MyCap API 🤟")
 	})
@@ -37,7 +37,6 @@ func New() *fiber.App {
 	v1.Post("/login", user.Login)
 
 	v1.Get("/users", user.GetAll)
-	v1.Delete("/users/:id", user.Delete)
 
 	v1.Get("/groups", group.GetAll)
 
@@ -46,6 +45,7 @@ func New() *fiber.App {
 	}))
 
 	v1.Put("/users/:id", user.Update)
+	v1.Delete("/users/:id", user.Delete)
 
 	v1.Post("/groups", group.New)
 	v1.Post("/join-groups", group.Join)

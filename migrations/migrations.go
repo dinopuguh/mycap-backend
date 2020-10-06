@@ -10,6 +10,7 @@ import (
 
 // All migrates all models to database
 func All() {
+	database.DBConn.AutoMigrate(&user.Type{})
 	database.DBConn.AutoMigrate(&user.User{})
 	database.DBConn.AutoMigrate(&group.Group{})
 

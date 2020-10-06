@@ -74,7 +74,12 @@ func New(c *fiber.Ctx) error {
 	email := claims["email"].(string)
 
 	var admin = new(user.User)
-	db.Where("email = ?", email).First(&admin)
+	if err := db.Where("email = ?", email).First(&admin).Error; err != nil {
+		return c.JSON(response.HTTP{
+			Status:  http.StatusServiceUnavailable,
+			Message: err.Error(),
+		})
+	}
 
 	var existingGroup = new(Group)
 	if res := db.Where("admin_id = ?", admin.ID).First(&existingGroup); res.RowsAffected != 0 {
@@ -117,12 +122,7 @@ func New(c *fiber.Ctx) error {
 
 	group.Type = createGroup.Type
 
-	if res := db.Create(group); res.Error != nil {
-		return c.JSON(response.HTTP{
-			Status:  http.StatusServiceUnavailable,
-			Message: res.Error.Error(),
-		})
-	}
+	db.Create(group)
 
 	return c.JSON(response.HTTP{
 		Success: true,

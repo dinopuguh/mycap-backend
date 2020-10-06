@@ -10,13 +10,11 @@ ENV GO111MODULE=on \
     GOOS=linux \
     GOARCH=amd64
 RUN go build -o main .
-RUN go build -o migrate ./cmd
 
 FROM alpine:20200917
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 COPY --from=builder /app/main .
-COPY --from=builder /app/migrate .
 ENV MYCAP_PORT=3000
 EXPOSE 3000
 CMD [ "./main", "-migrate" ]

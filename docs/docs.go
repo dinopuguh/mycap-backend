@@ -348,8 +348,15 @@ var doc = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/v1/users/{id}": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update user by ID",
                 "consumes": [
                     "application/json"
@@ -362,6 +369,13 @@ var doc = `{
                 ],
                 "summary": "Update user by ID",
                 "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "Update user",
                         "name": "user",
@@ -392,10 +406,13 @@ var doc = `{
                         }
                     }
                 }
-            }
-        },
-        "/v1/users/{id}": {
+            },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Remove user by ID",
                 "consumes": [
                     "application/json"
@@ -524,6 +541,11 @@ var doc = `{
                     "type": "string",
                     "example": "s3cr3tp45sw0rd"
                 },
+                "type_id": {
+                    "description": "(1: Free, 2: Premium, 3: Pro)",
+                    "type": "integer",
+                    "example": 1
+                },
                 "username": {
                     "type": "string",
                     "example": "dinopuguh"
@@ -542,6 +564,14 @@ var doc = `{
                 }
             }
         },
+        "user.Type": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "user.UpdateUser": {
             "type": "object",
             "properties": {
@@ -549,13 +579,10 @@ var doc = `{
                     "type": "string",
                     "example": "Dino Puguh"
                 },
-                "reached_time_limit": {
-                    "type": "boolean",
-                    "example": false
-                },
-                "remaining_time": {
+                "type_id": {
+                    "description": "(1: Free, 2: Premium, 3: Pro)",
                     "type": "integer",
-                    "example": 1800
+                    "example": 2
                 }
             }
         },
@@ -575,6 +602,13 @@ var doc = `{
                     "type": "boolean"
                 },
                 "remaining_time": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "object",
+                    "$ref": "#/definitions/user.Type"
+                },
+                "type_id": {
                     "type": "integer"
                 },
                 "username": {
@@ -603,7 +637,7 @@ type swaggerInfo struct {
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
-	Version:     "",
+	Version:     "1.0",
 	Host:        "",
 	BasePath:    "/api",
 	Schemes:     []string{},

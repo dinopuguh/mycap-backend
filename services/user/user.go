@@ -17,8 +17,16 @@ type User struct {
 	Username         string `json:"username"`
 	Email            string `json:"email"`
 	Password         string `json:"password"`
-	RemainingTime    int64  `json:"remaining_time" gorm:"default:18000;"`
+	RemainingTime    int64  `json:"remaining_time" gorm:"default:36000000;"`
 	ReachedTimeLimit bool   `json:"reached_time_limit" gorm:"default:false;"`
+	Type             Type   `json:"type"`
+	TypeID           uint   `json:"type_id"`
+}
+
+// Type is a model for user's type
+type Type struct {
+	gorm.Model
+	Name string `json:"name"`
 }
 
 // GetAll is a function to get all users data from database
@@ -54,20 +62,14 @@ func GetAll(c *fiber.Ctx) error {
 // @Tags users
 // @Accept json
 // @Produce json
+// @Param id path int true "User ID"
 // @Param user body UpdateUser true "Update user"
 // @Success 200 {object} response.HTTP{data=User}
-// @Router /v1/users [put]
+// @Security ApiKeyAuth
+// @Router /v1/users/{id} [put]
 func Update(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
-
-	var user User
-	if res := db.First(&user, id); res.RowsAffected == 0 {
-		return c.JSON(response.HTTP{
-			Status:  http.StatusNotFound,
-			Message: fmt.Sprintf("User with ID %v not found.", id),
-		})
-	}
 
 	updatedUser := new(UpdateUser)
 	if err := c.BodyParser(&updatedUser); err != nil {
@@ -77,9 +79,38 @@ func Update(c *fiber.Ctx) error {
 		})
 	}
 
+	user := new(User)
+	if err := db.First(&user, id).Error; err != nil {
+		switch err.Error() {
+		case "record not found":
+			return c.JSON(response.HTTP{
+				Status:  http.StatusNotFound,
+				Message: fmt.Sprintf("User with ID %v not found.", id),
+			})
+		default:
+			return c.JSON(response.HTTP{
+				Status:  http.StatusServiceUnavailable,
+				Message: err.Error(),
+			})
+		}
+	}
+
+	userType := new(Type)
+	if updatedUser.TypeID != 0 {
+		if res := db.First(&userType, updatedUser.TypeID); res.RowsAffected == 0 {
+			return c.JSON(response.HTTP{
+				Status:  http.StatusNotFound,
+				Message: fmt.Sprintf("User type with ID %v not found.", updatedUser.TypeID),
+			})
+		}
+
+		user.TypeID = updatedUser.TypeID
+		user.Type = *userType
+	}
+
 	user.Name = updatedUser.Name
-	user.RemainingTime = updatedUser.RemainingTime
 	user.ReachedTimeLimit = updatedUser.ReachedTimeLimit
+	user.RemainingTime = updatedUser.RemainingTime
 
 	db.Save(&user)
 
@@ -99,25 +130,30 @@ func Update(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "User ID"
 // @Success 200 {object} response.HTTP
+// @Security ApiKeyAuth
 // @Router /v1/users/{id} [delete]
 func Delete(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
 
 	var user User
-	if res := db.First(&user, id); res.RowsAffected == 0 {
-		return c.JSON(response.HTTP{
-			Status:  http.StatusNotFound,
-			Message: fmt.Sprintf("User with ID %v not found.", id),
-		})
+	if err := db.First(&user, id).Error; err != nil {
+		switch err.Error() {
+		case "record not found":
+			return c.JSON(response.HTTP{
+				Status:  http.StatusNotFound,
+				Message: fmt.Sprintf("User with ID %v not found.", id),
+			})
+		default:
+			return c.JSON(response.HTTP{
+				Status:  http.StatusServiceUnavailable,
+				Message: err.Error(),
+			})
+
+		}
 	}
 
-	if res := db.Delete(&user); res.Error != nil {
-		return c.JSON(response.HTTP{
-			Status:  http.StatusServiceUnavailable,
-			Message: res.Error.Error(),
-		})
-	}
+	db.Delete(&user)
 
 	return c.JSON(response.HTTP{
 		Success: true,

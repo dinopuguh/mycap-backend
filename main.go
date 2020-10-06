@@ -4,11 +4,15 @@ import (
 	"flag"
 	"log"
 	"os"
+	"time"
 
 	"github.com/dinopuguh/mycap-backend/database"
 	_ "github.com/dinopuguh/mycap-backend/docs"
 	"github.com/dinopuguh/mycap-backend/migrations"
 	"github.com/dinopuguh/mycap-backend/routes"
+	"github.com/dinopuguh/mycap-backend/scheduler"
+	"github.com/dinopuguh/mycap-backend/seed"
+	"github.com/go-co-op/gocron"
 )
 
 // @title MyCap API
@@ -27,8 +31,7 @@ import (
 // @in header
 // @name Authorization
 func main() {
-	err := database.Connect()
-	if err != nil {
+	if err := database.Connect(); err != nil {
 		panic("Can't connect database.")
 	}
 
@@ -39,8 +42,17 @@ func main() {
 		migrations.All()
 	}
 
-	port := os.Getenv("PORT")
+	for _, seeder := range seed.AllTypes() {
+		if err := seeder.Run(database.DBConn); err != nil {
+			log.Fatalln(err.Error())
+		}
+	}
 
+	cron := gocron.NewScheduler(time.UTC)
+	cron.Every(1).Month(8).Do(scheduler.ResetTimeLimit)
+	cron.StartAsync()
+
+	port := os.Getenv("PORT")
 	app := routes.New()
 	log.Fatal(app.Listen(":" + port))
 }

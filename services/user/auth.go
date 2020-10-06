@@ -28,31 +28,52 @@ type ResponseAuth struct {
 func New(c *fiber.Ctx) error {
 	db := database.DBConn
 
-	user := new(User)
-	if err := c.BodyParser(&user); err != nil {
+	registerUser := new(RegisterUser)
+	if err := c.BodyParser(&registerUser); err != nil {
 		return c.JSON(response.HTTP{
 			Status:  http.StatusBadRequest,
 			Message: err.Error(),
 		})
 	}
 
-	var currentUser User
-	if res := db.Where("email = ?", user.Email).First(&currentUser); res.RowsAffected > 0 {
+	userType := new(Type)
+	if err := db.First(&userType, registerUser.TypeID).Error; err != nil {
+		switch err.Error() {
+		case "record not found":
+			return c.JSON(response.HTTP{
+				Status:  http.StatusBadRequest,
+				Message: "User type with this ID not exist.",
+			})
+		default:
+			return c.JSON(response.HTTP{
+				Status:  http.StatusServiceUnavailable,
+				Message: err.Error(),
+			})
+		}
+	}
+
+	user := new(User)
+	if res := db.Where("email = ?", registerUser.Email).First(&user); res.RowsAffected > 0 {
 		return c.JSON(response.HTTP{
 			Status:  http.StatusBadRequest,
 			Message: "User with this email is already exist.",
 		})
 	}
 
-	if res := db.Where("username = ?", user.Username).First(&currentUser); res.RowsAffected > 0 {
+	if res := db.Where("username = ?", registerUser.Username).First(&user); res.RowsAffected > 0 {
 		return c.JSON(response.HTTP{
 			Status:  http.StatusBadRequest,
 			Message: "User with this username is already exist.",
 		})
 	}
 
+	user.Name = registerUser.Name
+	user.Email = registerUser.Email
+	user.Username = registerUser.Username
+	user.Type = *userType
+
 	var err error
-	user.Password, err = helpers.HashPassword(user.Password)
+	user.Password, err = helpers.HashPassword(registerUser.Password)
 	if err != nil {
 		return c.JSON(response.HTTP{
 			Status:  http.StatusServiceUnavailable,
@@ -60,12 +81,7 @@ func New(c *fiber.Ctx) error {
 		})
 	}
 
-	if res := db.Create(user); res.Error != nil {
-		return c.JSON(response.HTTP{
-			Status:  http.StatusServiceUnavailable,
-			Message: res.Error.Error(),
-		})
-	}
+	db.Create(user)
 
 	token, err := auth.GenerateJWT(user.Name, user.Email)
 	if err != nil {

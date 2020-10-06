@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: script/goget
+# Usage: script/goget.sh
 #
 # Downloads dependencies
 
