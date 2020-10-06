@@ -29,10 +29,11 @@ func TestNew(t *testing.T) {
 	app := routes.New()
 
 	type args struct {
-		data        group.CreateGroup
-		login       user.LoginUser
-		statusCode  int
-		contentType string
+		data          group.CreateGroup
+		login         user.LoginUser
+		expectDBError bool
+		statusCode    int
+		contentType   string
 	}
 	tests := []struct {
 		name string
@@ -92,6 +93,18 @@ func TestNew(t *testing.T) {
 			statusCode:  http.StatusBadRequest,
 			contentType: "application/json",
 		}},
+		{"DB connection closed", args{
+			data: group.CreateGroup{
+				Type: "Group",
+			},
+			login: user.LoginUser{
+				Email:    "dinopuguh@mycap.com",
+				Password: "s3cr3tp45sw0rd",
+			},
+			expectDBError: true,
+			statusCode:    http.StatusServiceUnavailable,
+			contentType:   "application/json",
+		}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -107,6 +120,11 @@ func TestNew(t *testing.T) {
 			json.Unmarshal(resBodyLogin, &resHTTP)
 			loginJSON, _ := json.Marshal(resHTTP.Data)
 			json.Unmarshal(loginJSON, &login)
+
+			if tt.args.expectDBError {
+				db, _ := database.DBConn.DB()
+				db.Close()
+			}
 
 			reqBody, _ := json.Marshal(tt.args.data)
 			req, _ := http.NewRequest(http.MethodPost, "/api/v1/groups", bytes.NewBuffer(reqBody))
@@ -135,17 +153,42 @@ func TestGetAll(t *testing.T) {
 
 	app := routes.New()
 
-	t.Run("Get all groups", func(t *testing.T) {
-		req, _ := http.NewRequest(http.MethodGet, "/api/v1/groups", nil)
+	type args struct {
+		expectDBError bool
+		statusCode    int
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{"Valid get all", args{
+			expectDBError: false,
+			statusCode:    http.StatusOK,
+		}},
+		{"DB connection closed", args{
+			expectDBError: true,
+			statusCode:    http.StatusServiceUnavailable,
+		}},
+	}
 
-		resHTTP := new(response.HTTP)
-		res, _ := app.Test(req, -1)
-		defer res.Body.Close()
-		resBody, _ := ioutil.ReadAll(res.Body)
-		json.Unmarshal(resBody, &resHTTP)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.args.expectDBError {
+				db, _ := database.DBConn.DB()
+				db.Close()
+			}
 
-		assert.Equalf(t, http.StatusOK, resHTTP.Status, string(resBody))
-	})
+			req, _ := http.NewRequest(http.MethodGet, "/api/v1/groups", nil)
+
+			resHTTP := new(response.HTTP)
+			res, _ := app.Test(req, -1)
+			defer res.Body.Close()
+			resBody, _ := ioutil.ReadAll(res.Body)
+			json.Unmarshal(resBody, &resHTTP)
+
+			assert.Equalf(t, tt.args.statusCode, resHTTP.Status, string(resBody))
+		})
+	}
 }
 
 func TestJoin(t *testing.T) {
@@ -319,6 +362,7 @@ func TestLeave(t *testing.T) {
 			if tt.args.statusCode == http.StatusOK {
 				endpoint := fmt.Sprintf("/api/v1/users/%d", login.User.ID)
 				reqDeleteUser, _ := http.NewRequest(http.MethodDelete, endpoint, nil)
+				reqDeleteUser.Header.Set("Authorization", "Bearer "+login.AccessToken)
 				app.Test(reqDeleteUser, -1)
 			}
 
