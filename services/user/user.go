@@ -79,6 +79,22 @@ func Update(c *fiber.Ctx) error {
 		})
 	}
 
+	user := new(User)
+	if err := db.First(&user, id).Error; err != nil {
+		switch err.Error() {
+		case "record not found":
+			return c.JSON(response.HTTP{
+				Status:  http.StatusNotFound,
+				Message: fmt.Sprintf("User with ID %v not found.", id),
+			})
+		default:
+			return c.JSON(response.HTTP{
+				Status:  http.StatusServiceUnavailable,
+				Message: err.Error(),
+			})
+		}
+	}
+
 	userType := new(Type)
 	if updatedUser.TypeID != 0 {
 		if res := db.First(&userType, updatedUser.TypeID); res.RowsAffected == 0 {
@@ -87,21 +103,16 @@ func Update(c *fiber.Ctx) error {
 				Message: fmt.Sprintf("User type with ID %v not found.", updatedUser.TypeID),
 			})
 		}
+
+		user.TypeID = updatedUser.TypeID
+		user.Type = *userType
 	}
 
-	if res := db.Model(User{}).Where("id = ?", id).Updates(User{
-		Name:   updatedUser.Name,
-		TypeID: updatedUser.TypeID,
-		Type:   *userType,
-	}); res.RowsAffected == 0 {
-		return c.JSON(response.HTTP{
-			Status:  http.StatusNotFound,
-			Message: fmt.Sprintf("User with ID %v not found.", id),
-		})
-	}
+	user.Name = updatedUser.Name
+	user.ReachedTimeLimit = updatedUser.ReachedTimeLimit
+	user.RemainingTime = updatedUser.RemainingTime
 
-	user := new(User)
-	db.First(&user, id)
+	db.Save(&user)
 
 	return c.JSON(response.HTTP{
 		Success: true,

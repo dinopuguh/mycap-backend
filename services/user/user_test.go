@@ -171,11 +171,12 @@ func TestUpdate(t *testing.T) {
 	app := routes.New()
 
 	type args struct {
-		data        user.UpdateUser
-		login       user.LoginUser
-		userID      uint
-		statusCode  int
-		contentType string
+		data          user.UpdateUser
+		login         user.LoginUser
+		expectDBError bool
+		userID        uint
+		statusCode    int
+		contentType   string
 	}
 	tests := []struct {
 		name string
@@ -183,7 +184,9 @@ func TestUpdate(t *testing.T) {
 	}{
 		{"Valid update", args{
 			data: user.UpdateUser{
-				Name: "Dino Yang Baru",
+				Name:             "Dino Yang Baru",
+				RemainingTime:    1800,
+				ReachedTimeLimit: false,
 			},
 			login: user.LoginUser{
 				Email:    "dinopuguh@email.com",
@@ -195,8 +198,10 @@ func TestUpdate(t *testing.T) {
 		}},
 		{"Valid update 2", args{
 			data: user.UpdateUser{
-				Name:   "Dino Yang Baru",
-				TypeID: 2,
+				Name:             "Dino Yang Baru",
+				RemainingTime:    0,
+				ReachedTimeLimit: true,
+				TypeID:           1,
 			},
 			login: user.LoginUser{
 				Email:    "dinopuguh@email.com",
@@ -215,7 +220,7 @@ func TestUpdate(t *testing.T) {
 				Email:    "dinopuguh@email.com",
 				Password: "s3cr3tp45sw0rd",
 			},
-			userID:      updatedUser.ID + 1,
+			userID:      updatedUser.ID,
 			statusCode:  http.StatusNotFound,
 			contentType: "application/json",
 		}},
@@ -242,6 +247,22 @@ func TestUpdate(t *testing.T) {
 			},
 			statusCode: http.StatusBadRequest,
 		}},
+		{"DB connection closed", args{
+			data: user.UpdateUser{
+				Name:             "Dino Yang Baru",
+				RemainingTime:    0,
+				ReachedTimeLimit: true,
+				TypeID:           1,
+			},
+			login: user.LoginUser{
+				Email:    "dinopuguh@email.com",
+				Password: "s3cr3tp45sw0rd",
+			},
+			expectDBError: true,
+			userID:        updatedUser.ID,
+			statusCode:    http.StatusServiceUnavailable,
+			contentType:   "application/json",
+		}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -257,6 +278,11 @@ func TestUpdate(t *testing.T) {
 			json.Unmarshal(resBodyLogin, &resHTTP)
 			loginJSON, _ := json.Marshal(resHTTP.Data)
 			json.Unmarshal(loginJSON, &login)
+
+			if tt.args.expectDBError {
+				db, _ := database.DBConn.DB()
+				db.Close()
+			}
 
 			reqBody, _ := json.Marshal(tt.args.data)
 			endpoint := fmt.Sprintf("/api/v1/users/%d", tt.args.userID)
