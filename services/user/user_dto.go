@@ -17,7 +17,6 @@ type RegisterUser struct {
 
 // UpdateUser is a data transfer object for update user
 type UpdateUser struct {
-	Name             string `json:"name" example:"Dino Puguh"`
-	RemainingTime    int64  `json:"remaining_time" example:"1800"`
-	ReachedTimeLimit bool   `json:"reached_time_limit" example:"false"`
+	Name   string `json:"name" example:"Dino Puguh"`
+	TypeID uint   `json:"type_id" example:"2"` // (1: Free, 2: Premium, 3: Pro)
 }

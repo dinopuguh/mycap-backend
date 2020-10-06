@@ -10,8 +10,8 @@ import (
 	_ "github.com/dinopuguh/mycap-backend/docs"
 	"github.com/dinopuguh/mycap-backend/migrations"
 	"github.com/dinopuguh/mycap-backend/routes"
+	"github.com/dinopuguh/mycap-backend/scheduler"
 	"github.com/dinopuguh/mycap-backend/seed"
-	"github.com/dinopuguh/mycap-backend/services/user"
 	"github.com/go-co-op/gocron"
 )
 
@@ -48,9 +48,9 @@ func main() {
 		}
 	}
 
-	scheduler := gocron.NewScheduler(time.UTC)
-	scheduler.Every(1).Month(7).Do(user.ResetTimeLimit)
-	scheduler.StartAsync()
+	cron := gocron.NewScheduler(time.UTC)
+	cron.Every(1).Month(8).Do(scheduler.ResetTimeLimit)
+	cron.StartAsync()
 
 	port := os.Getenv("PORT")
 	app := routes.New()

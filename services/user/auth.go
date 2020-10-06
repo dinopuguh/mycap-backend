@@ -37,11 +37,19 @@ func New(c *fiber.Ctx) error {
 	}
 
 	userType := new(Type)
-	if res := db.First(&userType, registerUser.TypeID); res.RowsAffected == 0 {
-		return c.JSON(response.HTTP{
-			Status:  http.StatusBadRequest,
-			Message: "User type with this ID not exist.",
-		})
+	if err := db.First(&userType, registerUser.TypeID).Error; err != nil {
+		switch err.Error() {
+		case "record not found":
+			return c.JSON(response.HTTP{
+				Status:  http.StatusBadRequest,
+				Message: "User type with this ID not exist.",
+			})
+		default:
+			return c.JSON(response.HTTP{
+				Status:  http.StatusServiceUnavailable,
+				Message: err.Error(),
+			})
+		}
 	}
 
 	user := new(User)
@@ -73,12 +81,7 @@ func New(c *fiber.Ctx) error {
 		})
 	}
 
-	if res := db.Create(user); res.Error != nil {
-		return c.JSON(response.HTTP{
-			Status:  http.StatusServiceUnavailable,
-			Message: res.Error.Error(),
-		})
-	}
+	db.Create(user)
 
 	token, err := auth.GenerateJWT(user.Name, user.Email)
 	if err != nil {

@@ -2,7 +2,6 @@ package user
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/dinopuguh/mycap-backend/database"
@@ -72,14 +71,6 @@ func Update(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
 
-	var user User
-	if res := db.First(&user, id); res.RowsAffected == 0 {
-		return c.JSON(response.HTTP{
-			Status:  http.StatusNotFound,
-			Message: fmt.Sprintf("User with ID %v not found.", id),
-		})
-	}
-
 	updatedUser := new(UpdateUser)
 	if err := c.BodyParser(&updatedUser); err != nil {
 		return c.JSON(response.HTTP{
@@ -88,11 +79,29 @@ func Update(c *fiber.Ctx) error {
 		})
 	}
 
-	user.Name = updatedUser.Name
-	user.RemainingTime = updatedUser.RemainingTime
-	user.ReachedTimeLimit = updatedUser.ReachedTimeLimit
+	userType := new(Type)
+	if updatedUser.TypeID != 0 {
+		if res := db.First(&userType, updatedUser.TypeID); res.RowsAffected == 0 {
+			return c.JSON(response.HTTP{
+				Status:  http.StatusNotFound,
+				Message: fmt.Sprintf("User type with ID %v not found.", updatedUser.TypeID),
+			})
+		}
+	}
 
-	db.Save(&user)
+	if res := db.Model(User{}).Where("id = ?", id).Updates(User{
+		Name:   updatedUser.Name,
+		TypeID: updatedUser.TypeID,
+		Type:   *userType,
+	}); res.RowsAffected == 0 {
+		return c.JSON(response.HTTP{
+			Status:  http.StatusNotFound,
+			Message: fmt.Sprintf("User with ID %v not found.", id),
+		})
+	}
+
+	user := new(User)
+	db.First(&user, id)
 
 	return c.JSON(response.HTTP{
 		Success: true,
@@ -117,34 +126,27 @@ func Delete(c *fiber.Ctx) error {
 	db := database.DBConn
 
 	var user User
-	if res := db.First(&user, id); res.RowsAffected == 0 {
-		return c.JSON(response.HTTP{
-			Status:  http.StatusNotFound,
-			Message: fmt.Sprintf("User with ID %v not found.", id),
-		})
+	if err := db.First(&user, id).Error; err != nil {
+		switch err.Error() {
+		case "record not found":
+			return c.JSON(response.HTTP{
+				Status:  http.StatusNotFound,
+				Message: fmt.Sprintf("User with ID %v not found.", id),
+			})
+		default:
+			return c.JSON(response.HTTP{
+				Status:  http.StatusServiceUnavailable,
+				Message: err.Error(),
+			})
+
+		}
 	}
 
-	if res := db.Delete(&user); res.Error != nil {
-		return c.JSON(response.HTTP{
-			Status:  http.StatusServiceUnavailable,
-			Message: res.Error.Error(),
-		})
-	}
+	db.Delete(&user)
 
 	return c.JSON(response.HTTP{
 		Success: true,
 		Status:  http.StatusOK,
 		Message: "Success delete user.",
 	})
-}
-
-// ResetTimeLimit function updates users' time limit monthly
-func ResetTimeLimit() {
-	db := database.DBConn
-
-	db.Model(User{}).Where("type_id = ?", 1).Updates(map[string]interface{}{
-		"reached_time_limit": false,
-		"remaining_time":     36000000,
-	})
-	log.Println("Update free users' remaining time.")
 }
