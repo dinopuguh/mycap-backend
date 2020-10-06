@@ -352,6 +352,11 @@ var doc = `{
         },
         "/v1/users/{id}": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update user by ID",
                 "consumes": [
                     "application/json"
@@ -403,6 +408,11 @@ var doc = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Remove user by ID",
                 "consumes": [
                     "application/json"
@@ -569,13 +579,10 @@ var doc = `{
                     "type": "string",
                     "example": "Dino Puguh"
                 },
-                "reached_time_limit": {
-                    "type": "boolean",
-                    "example": false
-                },
-                "remaining_time": {
+                "type_id": {
+                    "description": "(1: Free, 2: Premium, 3: Pro)",
                     "type": "integer",
-                    "example": 1800
+                    "example": 2
                 }
             }
         },

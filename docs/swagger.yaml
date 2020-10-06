@@ -90,11 +90,9 @@ definitions:
       name:
         example: Dino Puguh
         type: string
-      reached_time_limit:
-        example: false
-        type: boolean
-      remaining_time:
-        example: 1800
+      type_id:
+        description: '(1: Free, 2: Premium, 3: Pro)'
+        example: 2
         type: integer
     type: object
   user.User:
@@ -330,6 +328,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.HTTP'
+      security:
+      - ApiKeyAuth: []
       summary: Remove user by ID
       tags:
       - users
@@ -361,6 +361,8 @@ paths:
                 data:
                   $ref: '#/definitions/user.User'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update user by ID
       tags:
       - users
