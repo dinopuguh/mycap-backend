@@ -5,15 +5,15 @@
 
 set -e
 
-echo "mode: set" > coverage.out
+echo "mode: count" > coverage.txt
 
-go test -v -covermode=set -coverprofile=profile.out ./services/user/...
-grep -v "mode: set" >> coverage.out profile.out
+go test -v -covermode=count -coverprofile=profile.txt ./services/user/...
+grep -v "mode: count" >> coverage.txt profile.txt
 
-go test -v -covermode=set -coverprofile=profile.out ./services/group/...
-grep -v "mode: set" >> coverage.out profile.out
+go test -v -covermode=count -coverprofile=profile.txt ./services/group/...
+grep -v "mode: count" >> coverage.txt profile.txt
 
-echo "$GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-pro -repotoken $COVERALLS_TOKEN"
+bash <(curl -s https://codecov.io/bash)
 
-rm -rf ./coverage.out
-rm -rf ./profile.out
+rm -rf ./coverage.txt
+rm -rf ./profile.txt
