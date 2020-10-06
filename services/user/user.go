@@ -66,6 +66,7 @@ func GetAll(c *fiber.Ctx) error {
 // @Param id path int true "User ID"
 // @Param user body UpdateUser true "Update user"
 // @Success 200 {object} response.HTTP{data=User}
+// @Security ApiKeyAuth
 // @Router /v1/users/{id} [put]
 func Update(c *fiber.Ctx) error {
 	id := c.Params("id")
@@ -109,6 +110,7 @@ func Update(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "User ID"
 // @Success 200 {object} response.HTTP
+// @Security ApiKeyAuth
 // @Router /v1/users/{id} [delete]
 func Delete(c *fiber.Ctx) error {
 	id := c.Params("id")
