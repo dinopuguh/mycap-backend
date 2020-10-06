@@ -12,7 +12,7 @@ type RegisterUser struct {
 	Username string `json:"username" example:"dinopuguh"`
 	Email    string `json:"email" example:"dinopuguh@mycap.com"`
 	Password string `json:"password" example:"s3cr3tp45sw0rd"`
-	TypeID   string `json:"type_id" example:"1 (1: Free, 2: Premium, 3: Pro)"`
+	TypeID   uint   `json:"type_id" example:"1"` // (1: Free, 2: Premium, 3: Pro)
 }
 
 // UpdateUser is a data transfer object for update user

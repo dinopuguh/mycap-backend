@@ -10,6 +10,7 @@ import (
 	_ "github.com/dinopuguh/mycap-backend/docs"
 	"github.com/dinopuguh/mycap-backend/migrations"
 	"github.com/dinopuguh/mycap-backend/routes"
+	"github.com/dinopuguh/mycap-backend/seed"
 	"github.com/dinopuguh/mycap-backend/services/user"
 	"github.com/go-co-op/gocron"
 )
@@ -41,12 +42,17 @@ func main() {
 		migrations.All()
 	}
 
-	port := os.Getenv("PORT")
+	for _, seeder := range seed.AllTypes() {
+		if err := seeder.Run(database.DBConn); err != nil {
+			log.Fatalln(err.Error())
+		}
+	}
 
 	scheduler := gocron.NewScheduler(time.UTC)
-	scheduler.Every(1).Hour().Do(user.ResetTimeLimit)
+	scheduler.Every(1).Month(7).Do(user.ResetTimeLimit)
 	scheduler.StartAsync()
 
+	port := os.Getenv("PORT")
 	app := routes.New()
 	log.Fatal(app.Listen(":" + port))
 }

@@ -2,6 +2,7 @@ package user
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/dinopuguh/mycap-backend/database"
@@ -139,5 +140,9 @@ func Delete(c *fiber.Ctx) error {
 func ResetTimeLimit() {
 	db := database.DBConn
 
-	db.Model(User{}).Where("type_id = ?", 1).Updates(User{ReachedTimeLimit: false, RemainingTime: 36000000})
+	db.Model(User{}).Where("type_id = ?", 1).Updates(map[string]interface{}{
+		"reached_time_limit": false,
+		"remaining_time":     36000000,
+	})
+	log.Println("Update free users' remaining time.")
 }

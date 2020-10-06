@@ -10,7 +10,8 @@
         "license": {
             "name": "Apache 2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        }
+        },
+        "version": "1.0"
     },
     "basePath": "/api",
     "paths": {
@@ -331,7 +332,9 @@
                         }
                     }
                 }
-            },
+            }
+        },
+        "/v1/users/{id}": {
             "put": {
                 "description": "Update user by ID",
                 "consumes": [
@@ -345,6 +348,13 @@
                 ],
                 "summary": "Update user by ID",
                 "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "Update user",
                         "name": "user",
@@ -375,9 +385,7 @@
                         }
                     }
                 }
-            }
-        },
-        "/v1/users/{id}": {
+            },
             "delete": {
                 "description": "Remove user by ID",
                 "consumes": [
@@ -507,6 +515,11 @@
                     "type": "string",
                     "example": "s3cr3tp45sw0rd"
                 },
+                "type_id": {
+                    "description": "(1: Free, 2: Premium, 3: Pro)",
+                    "type": "integer",
+                    "example": 1
+                },
                 "username": {
                     "type": "string",
                     "example": "dinopuguh"
@@ -522,6 +535,14 @@
                 "user": {
                     "type": "object",
                     "$ref": "#/definitions/user.User"
+                }
+            }
+        },
+        "user.Type": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -558,6 +579,13 @@
                     "type": "boolean"
                 },
                 "remaining_time": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "object",
+                    "$ref": "#/definitions/user.Type"
+                },
+                "type_id": {
                     "type": "integer"
                 },
                 "username": {

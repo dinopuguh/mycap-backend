@@ -59,8 +59,12 @@ func New(c *fiber.Ctx) error {
 		})
 	}
 
-	var err error
+	user.Name = registerUser.Name
+	user.Email = registerUser.Email
+	user.Username = registerUser.Username
 	user.Type = *userType
+
+	var err error
 	user.Password, err = helpers.HashPassword(registerUser.Password)
 	if err != nil {
 		return c.JSON(response.HTTP{
