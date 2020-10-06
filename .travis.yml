@@ -28,11 +28,6 @@ after_success:
   - docker push $DOCKER_USER/mycap-backend:$TRAVIS_BUILD_NUMBER
   - docker tag mycap-backend $DOCKER_USER/mycap-backend:latest
   - docker push $DOCKER_USER/mycap-backend:latest
-deploy:
-  provider: script
-  script:
-    - docker login -u $HEROKU_USER -p $HEROKU_API_KEY registry.heroku.com
-    - heroku container:push web -a mycap-staging
-    - heroku container:release web -a mycap-staging
-  on:
-    branch: master
+  - docker login -u $HEROKU_USER -p $HEROKU_API_KEY registry.heroku.com
+  - heroku container:push web -a mycap-staging
+  - heroku container:release web -a mycap-staging
