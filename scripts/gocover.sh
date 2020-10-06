@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Usage: scripts/gocover
+# Usage: scripts/gocover.sh
 #
 # Coverage test
 
