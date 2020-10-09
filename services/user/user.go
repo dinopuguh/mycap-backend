@@ -41,7 +41,7 @@ func GetAll(c *fiber.Ctx) error {
 	db := database.DBConn
 
 	var users []User
-	if res := db.Find(&users); res.Error != nil {
+	if res := db.Preload("Type").Find(&users); res.Error != nil {
 		return c.JSON(response.HTTP{
 			Status:  http.StatusServiceUnavailable,
 			Message: res.Error.Error(),
@@ -80,7 +80,7 @@ func Update(c *fiber.Ctx) error {
 	}
 
 	user := new(User)
-	if err := db.First(&user, id).Error; err != nil {
+	if err := db.Preload("Type").First(&user, id).Error; err != nil {
 		switch err.Error() {
 		case "record not found":
 			return c.JSON(response.HTTP{

@@ -36,6 +36,10 @@ func New(c *fiber.Ctx) error {
 		})
 	}
 
+	if registerUser.TypeID == 0 {
+		registerUser.TypeID = 1
+	}
+
 	userType := new(Type)
 	if err := db.First(&userType, registerUser.TypeID).Error; err != nil {
 		switch err.Error() {
@@ -123,7 +127,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	var user User
-	if res := db.Where("email = ?", login.Email).First(&user); res.RowsAffected == 0 {
+	if res := db.Preload("Type").Where("email = ?", login.Email).First(&user); res.RowsAffected == 0 {
 		return c.JSON(response.HTTP{
 			Status:  http.StatusNotFound,
 			Message: "User with this email not found.",

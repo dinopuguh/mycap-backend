@@ -40,7 +40,7 @@ func New() *fiber.App {
 
 	v1.Get("/groups", group.GetAll)
 
-	app.Use(jwtware.New(jwtware.Config{
+	v1.Use(jwtware.New(jwtware.Config{
 		SigningKey: auth.SigningKey,
 	}))
 
@@ -50,6 +50,10 @@ func New() *fiber.App {
 	v1.Post("/groups", group.New)
 	v1.Post("/join-groups", group.Join)
 	v1.Post("/leave-groups", group.Leave)
+
+	app.Use(func(c *fiber.Ctx) error {
+		return c.SendStatus(404)
+	})
 
 	return app
 }
