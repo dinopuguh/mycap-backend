@@ -66,7 +66,6 @@ func TestNew(t *testing.T) {
 				Email:    "dinopuguh@email.com",
 				Username: "dino16",
 				Password: "s3cr3tp45sw0rd",
-				TypeID:   1,
 			},
 			statusCode:  http.StatusOK,
 			contentType: "application/json",

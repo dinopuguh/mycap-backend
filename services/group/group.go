@@ -41,7 +41,7 @@ func GetAll(c *fiber.Ctx) error {
 	db := database.DBConn
 
 	var groups []Group
-	if res := db.Preload("Admin").Preload("Participants").Find(&groups); res.Error != nil {
+	if res := db.Preload("Admin").Preload("Admin.Type").Preload("Participants").Preload("Participants.Type").Find(&groups); res.Error != nil {
 		return c.JSON(response.HTTP{
 			Status:  http.StatusServiceUnavailable,
 			Message: res.Error.Error(),
@@ -74,7 +74,7 @@ func New(c *fiber.Ctx) error {
 	email := claims["email"].(string)
 
 	var admin = new(user.User)
-	if err := db.Where("email = ?", email).First(&admin).Error; err != nil {
+	if err := db.Preload("Type").Where("email = ?", email).First(&admin).Error; err != nil {
 		return c.JSON(response.HTTP{
 			Status:  http.StatusServiceUnavailable,
 			Message: err.Error(),
@@ -172,7 +172,7 @@ func Join(c *fiber.Ctx) error {
 
 	db.Save(&group)
 
-	db.Preload("Admin").Preload("Participants").First(&group, group.ID)
+	db.Preload("Admin").Preload("Admin.Type").Preload("Participants").First(&group, group.ID)
 
 	return c.JSON(response.HTTP{
 		Success: true,
@@ -211,7 +211,7 @@ func Leave(c *fiber.Ctx) error {
 	}
 
 	var group = new(Group)
-	if res := db.Preload("Admin").Where("admin_username = ?", leaveGroup.AdminUsername).First(&group); res.RowsAffected == 0 {
+	if res := db.Preload("Admin").Preload("Admin.Type").Where("admin_username = ?", leaveGroup.AdminUsername).First(&group); res.RowsAffected == 0 {
 		return c.JSON(response.HTTP{
 			Status:  http.StatusNotFound,
 			Message: "Group not found.",
@@ -224,12 +224,13 @@ func Leave(c *fiber.Ctx) error {
 			leavingUser.ReachedTimeLimit = true
 		}
 		db.Save(&leavingUser)
+		group.Admin = *leavingUser
 
 		db.Model(&group).Association("Participants").Clear()
 		db.Delete(&group)
 	} else {
 		db.Model(&group).Association("Participants").Delete(leavingUser)
-		db.Preload("Admin").Preload("Participants").First(&group, group.ID)
+		db.Preload("Admin").Preload("Admin.Type").Preload("Participants").First(&group, group.ID)
 	}
 
 	return c.JSON(response.HTTP{
